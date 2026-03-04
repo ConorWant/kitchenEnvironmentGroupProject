@@ -10,7 +10,7 @@ from bme280 import BME280
 import spidev
 
 #Settings
-LOG_INTERVAL = 30
+LOG_INTERVAL = 10
 CSV_FILENAME = "sensor_log.csv"
 
 # Sensor initialization
