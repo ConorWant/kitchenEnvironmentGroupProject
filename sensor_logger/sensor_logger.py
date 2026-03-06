@@ -12,6 +12,7 @@ import spidev
 #Settings
 LOG_INTERVAL = 10
 CSV_FILENAME = "sensor_log.csv"
+TEMP_OFFSET = -4
 
 # Sensor initialization
 GPIO.setmode(GPIO.BCM)
@@ -52,7 +53,7 @@ def read_door_status(pin):
 
 
 def read_bme_sensor():
-    temperature = round(bme280.get_temperature(), 2)
+    temperature = round(bme280.get_temperature() + TEMP_OFFSET, 2)
     humidity    = round(bme280.get_humidity(), 2)
     pressure    = round(bme280.get_pressure(), 2)
     return temperature, humidity, pressure
