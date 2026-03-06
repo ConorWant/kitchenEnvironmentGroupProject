@@ -73,8 +73,8 @@ time.sleep(2)
 try:
     while True:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        door = read_door_status(5)
         temperature, humidity, pressure = read_bme_sensor()
+	door = read_door_status(5)
         light = read_light_sensor()
         writer.writerow([timestamp, door, temperature, humidity, pressure, light])
         csv_file.flush()
