@@ -9,6 +9,23 @@ from smbus2 import SMBus
 from bme280 import BME280
 import spidev
 
+# optional: push data directly to the Django site
+try:
+    import requests
+except ImportError:
+    requests = None
+
+API_URL = os.environ.get('DJANGO_API_URL', 'http://localhost:8000/api/ingest/')
+
+
+def post_to_django(payload: dict):
+    if requests is None:
+        return
+    try:
+        requests.post(API_URL, json=payload, timeout=2)
+    except Exception as exc:
+        print('failed to send to django:', exc)
+
 #Settings
 LOG_INTERVAL = 10
 CSV_FILENAME = "sensor_log.csv"
@@ -74,10 +91,20 @@ try:
     while True:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         temperature, humidity, pressure = read_bme_sensor()
-	door = read_door_status(5)
+        door = read_door_status(5)
         light = read_light_sensor()
         writer.writerow([timestamp, door, temperature, humidity, pressure, light])
         csv_file.flush()
+
+        # optionally push the same reading into the Django database
+        post_to_django({
+            'temperature': temperature,
+            'humidity': humidity,
+            'pressure': pressure,
+            'door': door,
+            'light': light,
+        })
+
         print(f"{timestamp} | Door Status: {door} | "
               f"Temp: {temperature}C | Humidity: {humidity}% | Pressure: {pressure}hPa | Light: {light}")
         time.sleep(LOG_INTERVAL)
