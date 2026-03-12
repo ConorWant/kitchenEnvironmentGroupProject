@@ -7,29 +7,25 @@ from datetime import datetime
 import RPi.GPIO as GPIO
 from smbus2 import SMBus
 from bme280 import BME280
-import spidev
+from ltr559 import LTR559
 
-#Settings
+# Settings
 LOG_INTERVAL = 10
 CSV_FILENAME = "sensor_log.csv"
-TEMP_OFFSET = -4
+TEMP_OFFSET  = -7
 
 # Sensor initialization
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 i2c_bus = SMBus(1)
-bme280 = BME280(i2c_dev=i2c_bus)
-
-spi = spidev.SpiDev()
-spi.open(0, 0)
-spi.max_speed_hz = 1000000
-spi.mode = 0b00
+bme280  = BME280(i2c_dev=i2c_bus)
+ltr559  = LTR559()
 
 # Sets up output file
 file_exists = os.path.exists(CSV_FILENAME)
-csv_file = open(CSV_FILENAME, "a", newline="")
-writer = csv.writer(csv_file)
+csv_file    = open(CSV_FILENAME, "a", newline="")
+writer      = csv.writer(csv_file)
 
 if not file_exists:
     writer.writerow([
@@ -38,7 +34,7 @@ if not file_exists:
         "humidity_pct",
         "pressure_hpa",
         "door_status",
-        "light_level",
+        "light_lux",
     ])
     print("Created new log file:", CSV_FILENAME)
 else:
@@ -60,27 +56,32 @@ def read_bme_sensor():
 
 
 def read_light_sensor():
-    resp = spi.xfer2([0x00, 0x00])
-    raw = ((resp[0] & 0x1F) << 8 | resp[1]) >> 1
-    light = min(255, int(raw / 4096 * 255))
-    return light
+    ltr559.update_sensor()
+    lux = round(ltr559.get_lux(), 2)
+    return lux
 
 
 # Throws away first reading as it is unreliable
 bme280.get_temperature()
 time.sleep(2)
+
 # Main loop
 try:
     while True:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         temperature, humidity, pressure = read_bme_sensor()
-	door = read_door_status(5)
+        door  = read_door_status(5)
         light = read_light_sensor()
-        writer.writerow([timestamp, door, temperature, humidity, pressure, light])
+
+        writer.writerow([timestamp, temperature, humidity, pressure, door, light])
         csv_file.flush()
+
         print(f"{timestamp} | Door Status: {door} | "
-              f"Temp: {temperature}C | Humidity: {humidity}% | Pressure: {pressure}hPa | Light: {light}")
+              f"Temp: {temperature}C | Humidity: {humidity}% | "
+              f"Pressure: {pressure}hPa | Light: {light} lux")
+
         time.sleep(LOG_INTERVAL)
+
 # Cleanup
 except KeyboardInterrupt:
     print("\nStopped.")
@@ -88,4 +89,4 @@ except KeyboardInterrupt:
 finally:
     csv_file.close()
     GPIO.cleanup()
-    spi.close()
+    print("Cleanup done. Data saved to:", CSV_FILENAME)
