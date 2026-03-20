@@ -8,10 +8,13 @@ import RPi.GPIO as GPIO
 from smbus2 import SMBus
 from bme280 import BME280
 from ltr559 import LTR559
+import sys
 
 # Settings
+FRIDGE_TYPE = sys.argv[1]
+FRIDGE_NUMBER = sys.argv[2]
 LOG_INTERVAL = 10
-CSV_FILENAME = "sensor_log.csv"
+CSV_FILENAME = "sensor_log" + "_" + FRIDGE_TYPE + "_" + FRIDGE_NUMBER + ".csv"
 TEMP_OFFSET  = -7
 
 # Sensor initialization
