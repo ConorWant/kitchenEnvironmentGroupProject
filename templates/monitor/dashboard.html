@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="toolbar">
+    <form method="get" class="filters">
+        <label for="source">Unit</label>
+        <select id="source" name="source">
+            {% for source in dataset.sources %}
+            <option value="{{ source.slug }}" {% if source.slug == selected_source %}selected{% endif %}>{{ source.label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Apply</button>
+    </form>
+    {% if dataset.using_csv %}
+    <p class="mode-pill">CSV fallback mode (database empty)</p>
+    {% else %}
+    <p class="mode-pill">Database mode</p>
+    {% endif %}
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <h2>Latest Temp</h2>
+        <p>{% if summary.latest %}{{ summary.latest.temperature_c|floatformat:2 }} C{% else %}--{% endif %}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Average Humidity</h2>
+        <p>{% if summary.avg_humidity %}{{ summary.avg_humidity|floatformat:2 }} %{% else %}--{% endif %}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Average Pressure</h2>
+        <p>{% if summary.avg_pressure %}{{ summary.avg_pressure|floatformat:2 }} hPa{% else %}--{% endif %}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Door Open Events</h2>
+        <p>{{ summary.open_events }}</p>
+    </article>
+</section>
+
+<section class="panel">
+    <h2>Recent Readings</h2>
+    {% if dataset.has_data %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Unit</th>
+                    <th>Temp (C)</th>
+                    <th>Humidity (%)</th>
+                    <th>Pressure (hPa)</th>
+                    <th>Door</th>
+                    <th>Light (lux)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reading in recent_readings %}
+                <tr>
+                    <td>{{ reading.timestamp|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ reading.fridge_type|title }} {{ reading.fridge_number }}</td>
+                    <td>{{ reading.temperature_c|floatformat:2 }}</td>
+                    <td>{{ reading.humidity_pct|floatformat:2 }}</td>
+                    <td>{{ reading.pressure_hpa|floatformat:2 }}</td>
+                    <td>{{ reading.door_status }}</td>
+                    <td>{{ reading.light_lux|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No readings available yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

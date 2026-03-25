@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="toolbar">
+    <form method="get" class="filters filters-wide">
+        <label for="source">Unit</label>
+        <select id="source" name="source">
+            {% for source in dataset.sources %}
+            <option value="{{ source.slug }}" {% if source.slug == selected_source %}selected{% endif %}>{{ source.label }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="door">Door</label>
+        <select id="door" name="door">
+            <option value="all" {% if door_filter == 'all' %}selected{% endif %}>All</option>
+            <option value="OPEN" {% if door_filter == 'OPEN' %}selected{% endif %}>Open</option>
+            <option value="CLOSED" {% if door_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
+        </select>
+
+        <label for="sort">Sort</label>
+        <select id="sort" name="sort">
+            <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Newest first</option>
+            <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Oldest first</option>
+        </select>
+
+        <button type="submit">Apply</button>
+    </form>
+</section>
+
+<section class="panel">
+    <h2>Reading History</h2>
+    {% if dataset.has_data %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Unit</th>
+                    <th>Temp (C)</th>
+                    <th>Humidity (%)</th>
+                    <th>Pressure (hPa)</th>
+                    <th>Door</th>
+                    <th>Light (lux)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reading in page_obj.object_list %}
+                <tr>
+                    <td>{{ reading.timestamp|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ reading.fridge_type|title }} {{ reading.fridge_number }}</td>
+                    <td>{{ reading.temperature_c|floatformat:2 }}</td>
+                    <td>{{ reading.humidity_pct|floatformat:2 }}</td>
+                    <td>{{ reading.pressure_hpa|floatformat:2 }}</td>
+                    <td>{{ reading.door_status }}</td>
+                    <td>{{ reading.light_lux|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="pager">
+        {% if page_obj.has_previous %}
+        <a href="?source={{ selected_source }}&door={{ door_filter }}&sort={{ sort_order }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?source={{ selected_source }}&door={{ door_filter }}&sort={{ sort_order }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p>No readings available for this filter.</p>
+    {% endif %}
+</section>
+{% endblock %}
