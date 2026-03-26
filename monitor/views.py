@@ -57,6 +57,16 @@ def history_view(request):
 
 
 @login_required
+@user_passes_test(lambda user: user.is_superuser)
+def live_dashboard_view(request):
+    context = {
+        "page_title": "Live Dashboard",
+        "dashboard_url": "https://dashboard.diffa.co.uk/-/dashboards/fridge-monitor",
+    }
+    return render(request, "monitor/live_dashboard.html", context)
+
+
+@login_required
 @user_passes_test(lambda user: user.is_staff)
 def management_view(request):
     sources = (

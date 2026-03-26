@@ -81,6 +81,25 @@ body {
     transform: translateY(-1px);
 }
 
+.nav-logout {
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    transition: all 0.25s ease;
+}
+
+.nav-logout:hover,
+.nav-logout:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+}
+
 .shell {
     padding: 2rem 6vw 3rem;
     display: grid;
