@@ -3,7 +3,12 @@
     "allow": [
       "WebFetch(domain:dashboard.diffa.co.uk)",
       "Bash(python manage.py runserver)",
-      "Bash(ls -la \"C:/Users/conor/coding/kitchenEnvironmentGroupProject/sensor_logger/\" | grep -E \"\\\\.csv$\")"
+      "Bash(ls -la \"C:/Users/conor/coding/kitchenEnvironmentGroupProject/sensor_logger/\" | grep -E \"\\\\.csv$\")",
+      "Bash(python manage.py makemigrations 2>&1)",
+      "Bash(ls *.cfg *.toml requirements*.txt 2>/dev/null; ls -la)",
+      "Bash(.venv/Scripts/python manage.py makemigrations 2>&1)",
+      "Bash(.venv/Scripts/python manage.py migrate 2>&1)",
+      "Bash(.venv/Scripts/python manage.py help classify_readings 2>&1)"
     ]
   }
 }

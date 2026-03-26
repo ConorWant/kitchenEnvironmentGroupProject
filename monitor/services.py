@@ -17,16 +17,23 @@ def _source_label(fridge_type, fridge_number):
     return f"{fridge_type.capitalize()} {fridge_number}"
 
 
+def classify_reading(temp_c, lux):
+    return "Unsafe" if (temp_c > 8.0 or lux > 200.0) else "Safe"
+
+
 def _parse_csv_reading(row, fridge_type, fridge_number):
+    temp_c = float(row["temperature_c"])
+    lux = float(row["light_lux"])
     return {
         "timestamp": datetime.strptime(row["timestamp"], "%Y-%m-%d %H:%M:%S"),
-        "temperature_c": float(row["temperature_c"]),
+        "temperature_c": temp_c,
         "humidity_pct": float(row["humidity_pct"]),
         "pressure_hpa": float(row["pressure_hpa"]),
         "door_status": row["door_status"],
-        "light_lux": float(row["light_lux"]),
+        "light_lux": lux,
         "fridge_type": fridge_type,
         "fridge_number": int(fridge_number),
+        "safety_status": classify_reading(temp_c, lux),
     }
 
 
@@ -51,6 +58,7 @@ def _db_readings(selected_source, sort_order, door_filter):
             "light_lux",
             "fridge_type",
             "fridge_number",
+            "safety_status",
         )
     )
 
@@ -136,4 +144,5 @@ def build_summary(readings):
         "avg_humidity": sum(r["humidity_pct"] for r in readings) / count,
         "avg_pressure": sum(r["pressure_hpa"] for r in readings) / count,
         "open_events": sum(1 for r in readings if str(r["door_status"]).upper() == "OPEN"),
+        "latest_status": readings[0].get("safety_status") if readings else None,
     }

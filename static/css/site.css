@@ -283,6 +283,30 @@ th {
     color: #8a1b1b;
 }
 
+.alert-unsafe {
+    background: #fff3cd;
+    border: 1px solid #e0a800;
+    border-left: 4px solid #e0a800;
+    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+    color: #856404;
+    font-weight: 600;
+}
+
+.status-safe {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.status-unsafe {
+    color: #c62828;
+    font-weight: 700;
+}
+
+.status-unknown {
+    color: var(--ink-soft);
+}
+
 @media (max-width: 980px) {
     .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));

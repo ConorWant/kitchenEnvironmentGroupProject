@@ -17,6 +17,56 @@ LOG_INTERVAL = 10
 CSV_FILENAME = "sensor_log" + "_" + FRIDGE_TYPE + "_" + FRIDGE_NUMBER + ".csv"
 TEMP_OFFSET  = -7
 
+# Database config (optional — set these env vars to enable direct DB writes)
+DB_NAME     = os.getenv("DB_NAME")
+DB_USER     = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST     = os.getenv("DB_HOST", "localhost")
+DB_PORT     = os.getenv("DB_PORT", "5432")
+
+db_conn = None
+if DB_NAME:
+    try:
+        import psycopg2
+        db_conn = psycopg2.connect(
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT,
+        )
+        db_conn.autocommit = True
+        print("Connected to database.")
+    except Exception as e:
+        print(f"Warning: could not connect to database ({e}). Falling back to CSV only.")
+        db_conn = None
+
+
+def insert_db(timestamp, temperature, humidity, pressure, door, light):
+    if db_conn is None:
+        return
+    with db_conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO monitor_sensorreading
+                (timestamp, temperature_c, humidity_pct, pressure_hpa,
+                 door_status, light_lux, fridge_type, fridge_number, safety_status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                timestamp,
+                temperature,
+                humidity,
+                pressure,
+                door,
+                light,
+                FRIDGE_TYPE,
+                int(FRIDGE_NUMBER),
+                None,  # safety_status classified separately by R script
+            ),
+        )
+
+
 # Sensor initialization
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -79,6 +129,8 @@ try:
         writer.writerow([timestamp, temperature, humidity, pressure, door, light])
         csv_file.flush()
 
+        insert_db(timestamp, temperature, humidity, pressure, door, light)
+
         print(f"{timestamp} | Door Status: {door} | "
               f"Temp: {temperature}C | Humidity: {humidity}% | "
               f"Pressure: {pressure}hPa | Light: {light} lux")
@@ -92,4 +144,6 @@ except KeyboardInterrupt:
 finally:
     csv_file.close()
     GPIO.cleanup()
+    if db_conn:
+        db_conn.close()
     print("Cleanup done. Data saved to:", CSV_FILENAME)

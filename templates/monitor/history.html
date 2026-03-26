@@ -41,6 +41,7 @@
                     <th>Pressure (hPa)</th>
                     <th>Door</th>
                     <th>Light (lux)</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,6 +54,7 @@
                     <td>{{ reading.pressure_hpa|floatformat:2 }}</td>
                     <td>{{ reading.door_status }}</td>
                     <td>{{ reading.light_lux|floatformat:2 }}</td>
+                    <td class="status-{{ reading.safety_status|lower|default:'unknown' }}">{{ reading.safety_status|default:"--" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

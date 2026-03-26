@@ -37,6 +37,12 @@
     </article>
 </section>
 
+{% if summary.latest_status == "Unsafe" %}
+<div class="alert-unsafe">
+    Warning: Latest reading is classified as UNSAFE (temp &gt; 8&deg;C or door left open).
+</div>
+{% endif %}
+
 <section class="panel">
     <h2>Recent Readings</h2>
     {% if dataset.has_data %}
@@ -51,6 +57,7 @@
                     <th>Pressure (hPa)</th>
                     <th>Door</th>
                     <th>Light (lux)</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,6 +70,7 @@
                     <td>{{ reading.pressure_hpa|floatformat:2 }}</td>
                     <td>{{ reading.door_status }}</td>
                     <td>{{ reading.light_lux|floatformat:2 }}</td>
+                    <td class="status-{{ reading.safety_status|lower|default:'unknown' }}">{{ reading.safety_status|default:"--" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -15,6 +15,7 @@ class SensorReading(models.Model):
     light_lux = models.FloatField()
     fridge_type = models.CharField(max_length=16, choices=FRIDGE_TYPE_CHOICES)
     fridge_number = models.PositiveSmallIntegerField(default=1)
+    safety_status = models.CharField(max_length=10, null=True, blank=True)
 
     class Meta:
         ordering = ["-timestamp"]
