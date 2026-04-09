@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="stats-grid">
+    <article class="stat-card">
+        <h2>Total DB Rows</h2>
+        <p>{{ db_count }}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Distinct Units</h2>
+        <p>{{ sources|length }}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Data Input</h2>
+        <p>Database first</p>
+    </article>
+    <article class="stat-card">
+        <h2>Fallback</h2>
+        <p>CSV files</p>
+    </article>
+</section>
+
+<section class="panel">
+    <h2>Tracked Units</h2>
+    <ul class="unit-list">
+        {% for source in sources %}
+        <li>{{ source.fridge_type|title }} {{ source.fridge_number }}</li>
+        {% empty %}
+        <li>No unit records in database yet.</li>
+        {% endfor %}
+    </ul>
+    <p class="note">Use Django Admin to create or edit records.</p>
+</section>
+{% endblock %}
