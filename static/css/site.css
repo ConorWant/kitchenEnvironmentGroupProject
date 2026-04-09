@@ -12,6 +12,12 @@
 
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 body {
@@ -63,15 +69,13 @@ body {
     flex-wrap: wrap;
     gap: 0.8rem;
 }
-
-.site-nav a {
-    text-decoration: none;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 0.45rem 0.9rem;
+5rem 0.95rem;
     font-size: 0.9rem;
     transition: all 0.25s ease;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .site-nav a:hover,
@@ -89,6 +93,16 @@ body {
     color: var(--ink);
     border: 1px solid var(--line);
     border-radius: 999px;
+    padding: 0.5rem 0.95rem;
+    transition: all 0.25s ease;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center
+    font-size: 0.9rem;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 999px;
     padding: 0.45rem 0.9rem;
     transition: all 0.25s ease;
 }
@@ -96,22 +110,23 @@ body {
 .nav-logout:hover,
 .nav-logout:focus-visible {
     border-color: var(--accent);
-    color: var(--accent);
-    transform: translateY(-1px);
-}
-
-.shell {
-    padding: 2rem 6vw 3rem;
-    display: grid;
-    gap: 1.4rem;
-}
-
-.toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
+    color: var(--flex-start;
     gap: 1rem;
+}
+
+.filters {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.filters label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    font-weight: 500
 }
 
 .filters {
@@ -120,18 +135,40 @@ body {
     flex-wrap: wrap;
     gap: 0.65rem;
 }
-
-.filters label {
-    font-size: 0.84rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ink-soft);
+75rem 0.95rem;
+    font: inherit;
+    font-size: 16px;
+    min-height: 44px;
 }
 
 .filters select,
-.filters button,
 .login-form input {
-    border: 1px solid var(--line);
+    line-height: 1.5;
+}
+
+.filters select:focus,
+.login-form input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.filters button,
+.login-form button {
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: linear-gradient(110deg, var(--accent), #9e5932);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    min-height: 44px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.filters button:focus-visible,
+.login-form button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px(--line);
     background: rgba(255, 255, 255, 0.72);
     color: var(--ink);
     border-radius: 10px;
@@ -143,21 +180,22 @@ body {
 .login-form button {
     cursor: pointer;
     border: 1px solid transparent;
-    background: linear-gradient(110deg, var(--accent), #9e5932);
-    color: #fff;
-    font-weight: 700;
-    padding: 0.62rem 1rem;
+    background.2rem;
 }
 
-.filters button:hover,
-.login-form button:hover {
-    filter: brightness(1.06);
-}
-
-.mode-pill {
+.stat-card h2 {
     margin: 0;
-    border: 1px solid var(--line);
-    border-radius: 999px;
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ink-soft);
+}
+
+.stat-card p {
+    margin: 0.75rem 0 0;
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.1999px;
     padding: 0.5rem 0.9rem;
     font-size: 0.84rem;
     background: var(--panel);
@@ -178,21 +216,23 @@ body {
     backdrop-filter: blur(2px);
 }
 
-.stat-card {
-    border-radius: 16px;
-    padding: 1rem;
+    font-size: 0.95rem;
 }
 
-.stat-card h2 {
-    margin: 0;
-    font-size: 0.85rem;
+th,
+td {
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    padding: 0.85rem 0.6rem;
+    font-size: inherit;
+}
+
+th {
     text-transform: uppercase;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.07em;
+    font-size: 0.8rem;
     color: var(--ink-soft);
-}
-
-.stat-card p {
-    margin: 0.55rem 0 0;
+    font-weight: 600
     font-family: "Cormorant Garamond", serif;
     font-size: 2rem;
 }
@@ -236,7 +276,13 @@ th {
 .pager {
     margin-top: 1rem;
     display: flex;
-    gap: 1rem;
+    gap: 1r75rem;
+}
+
+.login-form label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.2m;
     align-items: center;
 }
 
@@ -307,26 +353,334 @@ th {
     color: var(--ink-soft);
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1024px) {
     .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .site-header {
-        padding: 1.2rem 1rem;
+        padding: 1.5rem 1.25rem 1rem;
+        gap: 1rem;
+    }
+
+    .brand {
+        font-size: clamp(1.5rem, 3.5vw, 3rem);
     }
 
     .shell {
+        padding: 1.25rem;
+        gap: 1.2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+    }
+
+    .stat-card {
         padding: 1rem;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters {
+        width: 100%;
+        gap: 0.6rem;
+    }
+
+    .filters select,
+    .filters button {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    th,
+    td {
+        padding: 0.7rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .pager {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .login-card {
+        padding: 1.4rem;
+    }
+
+    .login-card h1 {
+        font-size: clamp(1.6rem, 4vw, 2rem);
+    }
+}
+
+@media (max-width: 640px) {
+    .site-header {
+        padding: 1rem 1rem 0.8rem;
+        gap: 0.8rem;
+    }
+
+    .brand {
+        font-size: clamp(1.2rem, 3vw, 2rem);
+        margin-top: 0;
+    }
+
+    .eyebrow {
+        font-size: 0.7rem;
+    }
+
+    .site-nav {
+        gap: 0.6rem;
+        width: 100%;
+        flex-basis: 100%;
+    }
+
+    .site-nav a,
+    .nav-logout {
+        flex: 1;
+        min-width: 60px;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .shell {
+        padding: 0.9rem;
+        gap: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem;
+    }
+
+    .stat-card {
+        padding: 0.9rem;
+        border-radius: 12px;
+    }
+
+    .stat-card h2 {
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .stat-card p {
+        margin-top: 0.5rem;
+        font-size: 1.4rem;
+    }
+
+    .mode-pill {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    .alert-unsafe {
+        padding: 0.75rem 0.9rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .filters {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .filters select,
+    .filters button {
+        width: 100%;
+        padding: 0.7rem 0.85rem;
+    }
+
+    .panel {
+        padding: 0.9rem;
+        border-radius: 14px;
+    }
+
+    .panel h2 {
+        font-size: 1.4rem;
+        margin: 0 0 0.8rem 0;
+    }
+
+    .table-wrap {
+        margin: 0 -0.9rem;
+        padding: 0 0.9rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 100%;
+        font-size: 0.85rem;
+    }
+
+    th,
+    td {
+        padding: 0.6rem 0.4rem;
+        font-size: 0.85rem;
+    }
+
+    th {
+        font-size: 0.7rem;
+    }
+
+    .pager {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    .pager a,
+    .pager span {
+        text-align: center;
+        padding: 0.6rem;
+    }
+
+    .login-screen {
+        padding: 1rem;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 460px;
+        padding: 1.2rem;
+        border-radius: 16px;
+    }
+
+    .login-card h1 {
+        font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+        margin: 0.25rem 0 0.8rem;
+    }
+
+    .login-card .eyebrow {
+        font-size: 0.65rem;
+    }
+
+    .login-form {
+        gap: 0.65rem;
+    }
+
+    .login-form input {
+        padding: 0.7rem 0.85rem;
+        font-size: 16px;
+    }
+
+    .login-form button {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .error-message {
+        font-size: 0.85rem;
+    }
+
+    .unit-list {
+        padding-left: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .note {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-header {
+        padding: 0.9rem 0.8rem 0.7rem;
+        gap: 0.6rem;
+    }
+
+    .brand {
+        font-size: clamp(1rem, 2.5vw, 1.6rem);
+    }
+
+    .eyebrow {
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+    }
+
+    .site-nav {
+        gap: 0.5rem;
+    }
+
+    .site-nav a,
+    .nav-logout {
+        padding: 0.45rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .shell {
+        padding: 0.8rem;
+        gap: 0.9rem;
     }
 
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
 
-    .brand {
-        font-size: 2.1rem;
+    .stat-card {
+        padding: 0.8rem;
+    }
+
+    .stat-card h2 {
+        font-size: 0.7rem;
+    }
+
+    .stat-card p {
+        font-size: 1.2rem;
+        margin-top: 0.4rem;
+    }
+
+    .filters select,
+    .filters button {
+        min-height: 40px;
+        font-size: 14px;
+    }
+
+    .panel h2 {
+        font-size: 1.2rem;
+    }
+
+    table {
+        font-size: 0.8rem;
+    }
+
+    th,
+    td {
+        padding: 0.5rem 0.3rem;
+    }
+
+    .login-card {
+        padding: 1rem;
+    }
+
+    .login-card h1 {
+        font-size: 1.4rem;
+        margin: 0.2rem 0 0.7rem;
+    }
+
+    .login-form {
+        gap: 0.6rem;
+    }
+
+    .login-form label {
+        font-size: 0.85rem;
+    }
+
+    .login-form input,
+    .login-form button {
+        padding: 0.65rem 0.75rem;
+        font-size: 16px;
     }
 }
