@@ -59,8 +59,8 @@ python manage.py migrate
 5. Create admin user:
 
 ```bash
-python manage.py createsuperuser
-```
+
+```python manage.py createsuperuser
 
 6. Start development server:
 
@@ -71,6 +71,13 @@ python manage.py runserver
 7. Sign in at:
 
 - `http://127.0.0.1:8000/accounts/login/`
+
+8. Register a new user at :
+
+- 'http://127.0.0.1:8000/register/'
+
+# Possible "to-do":
+# - Instructions for accessing your Django server from another device!
 
 ## Data Behavior
 
