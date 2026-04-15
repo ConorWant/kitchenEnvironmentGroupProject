@@ -125,3 +125,12 @@ def management_view(request):
         "sources": sources,
     }
     return render(request, "monitor/management.html", context)
+
+
+   # from .services import is_anomalous
+
+# def dashboard_view(request):
+#     readings = SensorReading.objects.all()
+#     for reading in readings:
+#         reading.anomalous = is_anomalous(reading)
+#     return render(request, "dashboard.html", {"readings": readings})

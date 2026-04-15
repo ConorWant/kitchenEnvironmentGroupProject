@@ -5,6 +5,13 @@ from pathlib import Path
 
 from .models import SensorReading
 
+#TEMPERATURE_MIN = 0
+#TEMPERATURE_MAX = 8
+#PRESSURE_MIN = 950
+#PRESSURE_MAX = 1050
+#HUMIDITY_MIN = 20
+#HUMIDITY_MAX = 80
+
 CSV_DIR = Path(__file__).resolve().parent.parent / "sensor_logger"
 CSV_PATTERN = re.compile(r"sensor_log_(fridge|freezer)_(\d+)\.csv$")
 
@@ -146,3 +153,10 @@ def build_summary(readings):
         "open_events": sum(1 for r in readings if str(r["door_status"]).upper() == "OPEN"),
         "latest_status": readings[0].get("safety_status") if readings else None,
     }
+
+#def is_anomalous(reading):
+    #return (
+       # reading.temperature_c < TEMPERATURE_MIN or reading.temperature_c > TEMPERATURE_MAX or
+       # reading.pressure_hpa < PRESSURE_MIN or reading.pressure_hpa > PRESSURE_MAX or
+       # reading.humidity_pct < HUMIDITY_MIN or reading.humidity_pct > HUMIDITY_MAX
+    #)

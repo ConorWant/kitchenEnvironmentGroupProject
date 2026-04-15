@@ -62,7 +62,7 @@
             </thead>
             <tbody>
                 {% for reading in recent_readings %}
-                <tr>
+                <tr {% if reading.anomalous %}class="anomaly"{% endif %}>
                     <td>{{ reading.timestamp|date:"Y-m-d H:i:s" }}</td>
                     <td>{{ reading.fridge_type|title }} {{ reading.fridge_number }}</td>
                     <td>{{ reading.temperature_c|floatformat:2 }}</td>
