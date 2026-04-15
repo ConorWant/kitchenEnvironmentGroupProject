@@ -1,6 +1,6 @@
 Django>=4.2
 python-dotenv>=1.0
-RPi.GPIO
 smbus2
 pimoroni-bme280
 ltr559
+# RPi.GPIO
