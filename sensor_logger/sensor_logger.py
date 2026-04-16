@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import csv
 import time
 import os
@@ -16,7 +15,9 @@ FRIDGE_TYPE = sys.argv[1]
 FRIDGE_NUMBER = sys.argv[2]
 LOG_INTERVAL = 10
 CSV_FILENAME = "sensor_log" + "_" + FRIDGE_TYPE + "_" + FRIDGE_NUMBER + ".csv"
-TEMP_OFFSET  = -7
+TEMP_OFFSET = -7
+
+# API config
 API_BASE = "https://dashboard.pilsworth.org/-/insert"
 API_HEADERS = {
     "Authorization": "Bearer Team12FridgeFreezer",
@@ -24,32 +25,38 @@ API_HEADERS = {
 }
 API_ENDPOINT = f"sensor/{FRIDGE_TYPE}_{FRIDGE_NUMBER}"
 
-
-# Sensor initialization
+# Sensor initialisation
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-i2c_bus = SMBus(1)
-bme280  = BME280(i2c_dev=i2c_bus)
-ltr559  = LTR559()
+try:
+    i2c_bus = SMBus(1)
+    bme280 = BME280(i2c_dev=i2c_bus)
+    ltr559 = LTR559()
+except Exception as e:
+    print(f"[INIT ERROR] Could not initialise sensors: {e}")
+    sys.exit(1)
 
 # Sets up output file
-file_exists = os.path.exists(CSV_FILENAME)
-csv_file    = open(CSV_FILENAME, "a", newline="")
-writer      = csv.writer(csv_file)
-
-if not file_exists:
-    writer.writerow([
-        "timestamp",
-        "temperature_c",
-        "humidity_pct",
-        "pressure_hpa",
-        "door_status",
-        "light_lux",
-    ])
-    print("Created new log file:", CSV_FILENAME)
-else:
-    print("Appending to existing log file:", CSV_FILENAME)
+try:
+    file_exists = os.path.exists(CSV_FILENAME)
+    csv_file = open(CSV_FILENAME, "a", newline="")
+    writer = csv.writer(csv_file)
+    if not file_exists:
+        writer.writerow([
+            "timestamp",
+            "temperature_c",
+            "humidity_pct",
+            "pressure_hpa",
+            "door_status",
+            "light_lux",
+        ])
+        print("Created new log file:", CSV_FILENAME)
+    else:
+        print("Appending to existing log file:", CSV_FILENAME)
+except Exception as e:
+    print(f"[CSV ERROR] Could not open log file: {e}")
+    sys.exit(1)
 
 # Helper functions
 def post_to_api(timestamp, temperature, humidity, pressure, door, light):
@@ -65,15 +72,15 @@ def post_to_api(timestamp, temperature, humidity, pressure, door, light):
     try:
         r = requests.post(API_BASE + "/" + API_ENDPOINT, headers=API_HEADERS, json=payload, timeout=10)
         r.raise_for_status()
+        print(f"[API OK] Posted to {API_ENDPOINT}")
     except requests.RequestException as e:
         print(f"[API FAIL] {e}")
-        
+
 def read_door_status(pin):
     if GPIO.input(pin) == 0:
         return "CLOSED"
     else:
         return "OPEN"
-
 
 def read_bme_sensor():
     temperature = round(bme280.get_temperature() + TEMP_OFFSET, 2)
@@ -81,12 +88,10 @@ def read_bme_sensor():
     pressure    = round(bme280.get_pressure(), 2)
     return temperature, humidity, pressure
 
-
 def read_light_sensor():
     ltr559.update_sensor()
     lux = round(ltr559.get_lux(), 2)
     return lux
-
 
 # Throws away first reading as it is unreliable
 bme280.get_temperature()
@@ -96,13 +101,19 @@ time.sleep(2)
 try:
     while True:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        temperature, humidity, pressure = read_bme_sensor()
-        door  = read_door_status(5)
-        light = read_light_sensor()
+
+        try:
+            temperature, humidity, pressure = read_bme_sensor()
+            door = read_door_status(5)
+            light = read_light_sensor()
+        except Exception as e:
+            print(f"[SENSOR ERROR] {e}")
+            time.sleep(LOG_INTERVAL)
+            continue
 
         writer.writerow([timestamp, temperature, humidity, pressure, door, light])
         csv_file.flush()
-        
+
         post_to_api(timestamp, temperature, humidity, pressure, door, light)
 
         print(f"{timestamp} | Door Status: {door} | "
@@ -114,7 +125,6 @@ try:
 # Cleanup
 except KeyboardInterrupt:
     print("\nStopped.")
-
 finally:
     csv_file.close()
     GPIO.cleanup()
