@@ -1,9 +1,53 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.shortcuts import render
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.contrib.auth.models import User
+from django.http import HttpResponse
 
 from .models import SensorReading
 from .services import build_summary, get_readings
+from django.shortcuts import render, redirect
+from .forms import CustomUserCreationForm
+
+def user_register_view(request):
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False  # Deactivate account until it is confirmed
+            user.save()
+            token = default_token_generator.make_token(user)
+            uid = user.pk
+            verification_link = request.build_absolute_uri(
+                reverse('monitor:verify_email', args=[uid, token])
+            )
+            send_mail(
+                'Verify your email',
+                f'Click the link to verify your email: {verification_link}',
+                'noreply@yourdomain.com',
+                [user.email],
+                fail_silently=False,
+            )
+            return HttpResponse('Registration successful! Please check your email to verify your account.')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, "registration/register.html", {"form": form})
+    
+def verify_email(request, uid, token):
+    try:
+        user = User.objects.get(pk=uid)
+    except User.DoesNotExist:
+        return HttpResponse('Invalid user')
+
+    if default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return HttpResponse('Email verified! You can now log in.')
+    else:
+        return HttpResponse('Invalid or expired token')    
 
 
 @login_required
@@ -81,3 +125,12 @@ def management_view(request):
         "sources": sources,
     }
     return render(request, "monitor/management.html", context)
+
+
+   # from .services import is_anomalous
+
+# def dashboard_view(request):
+#     readings = SensorReading.objects.all()
+#     for reading in readings:
+#         reading.anomalous = is_anomalous(reading)
+#     return render(request, "dashboard.html", {"readings": readings})

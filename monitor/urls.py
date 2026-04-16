@@ -9,4 +9,8 @@ urlpatterns = [
     path("history/", views.history_view, name="history"),
     path("management/", views.management_view, name="management"),
     path("live-dashboard/", views.live_dashboard_view, name="live_dashboard"),
+    path("register/", views.user_register_view, name="register"),
+    path('verify-email/<int:uid>/<str:token>/', views.verify_email, name='verify_email'),
 ]
+
+
