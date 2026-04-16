@@ -69,49 +69,58 @@ body {
     flex-wrap: wrap;
     gap: 0.8rem;
 }
-5rem 0.95rem;
+
+.site-nav a,
+.nav-logout {
+    color: var(--ink);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.5rem 0.95rem;
+    font-family: inherit;
     font-size: 0.9rem;
-    transition: all 0.25s ease;
+    background: none;
     min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.25s ease;
+}
+
+.nav-logout {
+    cursor: pointer;
 }
 
 .site-nav a:hover,
-.site-nav a:focus-visible {
+.site-nav a:focus-visible,
+.nav-logout:hover,
+.nav-logout:focus-visible {
     border-color: var(--accent);
     color: var(--accent);
     transform: translateY(-1px);
 }
 
-.nav-logout {
-    background: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.9rem;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 0.5rem 0.95rem;
-    transition: all 0.25s ease;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center
-    font-size: 0.9rem;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 0.45rem 0.9rem;
-    transition: all 0.25s ease;
+.shell {
+    padding: 2rem 6vw;
+    display: grid;
+    gap: 1.5rem;
 }
 
-.nav-logout:hover,
-.nav-logout:focus-visible {
-    border-color: var(--accent);
-    color: var(--flex-start;
+.toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 1rem;
+}
+
+.mode-pill {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.84rem;
+    background: var(--panel);
 }
 
 .filters {
@@ -126,79 +135,50 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--ink-soft);
-    font-weight: 500
-}
-
-.filters {
-    display: flex;
-    align-items: end;
-    flex-wrap: wrap;
-    gap: 0.65rem;
-}
-75rem 0.95rem;
-    font: inherit;
-    font-size: 16px;
-    min-height: 44px;
+    font-weight: 500;
 }
 
 .filters select,
 .login-form input {
-    line-height: 1.5;
-}
-
-.filters select:focus,
-.login-form input:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
-
-.filters button,
-.login-form button {
-    cursor: pointer;
-    border: 1px solid transparent;
-    background: linear-gradient(110deg, var(--accent), #9e5932);
-    color: #fff;
-    font-weight: 700;
-    padding: 0.75rem 1.25rem;
-    min-height: 44px;
-    font-size: 16px;
-    transition: all 0.2s ease;
-}
-
-.filters button:focus-visible,
-.login-form button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px(--line);
+    border: 1px solid var(--line);
     background: rgba(255, 255, 255, 0.72);
     color: var(--ink);
     border-radius: 10px;
-    padding: 0.6rem 0.8rem;
+    padding: 0.75rem 0.95rem;
     font: inherit;
+    font-size: 16px;
+    min-height: 44px;
+    line-height: 1.5;
 }
 
 .filters button,
 .login-form button {
     cursor: pointer;
     border: 1px solid transparent;
-    background.2rem;
+    border-radius: 10px;
+    background: linear-gradient(110deg, var(--accent), #9e5932);
+    color: #fff;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    min-height: 44px;
+    transition: all 0.2s ease;
 }
 
-.stat-card h2 {
-    margin: 0;
-    font-size: clamp(0.75rem, 2vw, 0.85rem);
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: var(--ink-soft);
+.filters button:hover,
+.login-form button:hover {
+    filter: brightness(1.05);
 }
 
-.stat-card p {
-    margin: 0.75rem 0 0;
-    font-family: "Cormorant Garamond", serif;
-    font-size: clamp(1.5rem, 5vw, 2rem);
-    line-height: 1.1999px;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.84rem;
-    background: var(--panel);
+.filters select:focus,
+.filters button:focus-visible,
+.login-form input:focus,
+.login-form button:focus-visible,
+.site-nav a:focus-visible,
+.nav-logout:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .stats-grid {
@@ -216,25 +196,24 @@ body {
     backdrop-filter: blur(2px);
 }
 
-    font-size: 0.95rem;
+.stat-card {
+    border-radius: 16px;
+    padding: 1.2rem;
 }
 
-th,
-td {
-    text-align: left;
-    border-bottom: 1px solid var(--line);
-    padding: 0.85rem 0.6rem;
-    font-size: inherit;
-}
-
-th {
+.stat-card h2 {
+    margin: 0;
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
     text-transform: uppercase;
-    letter-spacing: 0.07em;
-    font-size: 0.8rem;
+    letter-spacing: 0.09em;
     color: var(--ink-soft);
-    font-weight: 600
+}
+
+.stat-card p {
+    margin: 0.75rem 0 0;
     font-family: "Cormorant Garamond", serif;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.15;
 }
 
 .panel {
@@ -243,7 +222,7 @@ th {
 }
 
 .panel h2 {
-    margin-top: 0;
+    margin: 0 0 0.8rem;
     font-family: "Cormorant Garamond", serif;
     font-size: 2rem;
     font-weight: 600;
@@ -262,28 +241,27 @@ th,
 td {
     text-align: left;
     border-bottom: 1px solid var(--line);
-    padding: 0.7rem 0.45rem;
+    padding: 0.85rem 0.6rem;
     font-size: 0.95rem;
 }
 
 th {
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    font-size: 0.76rem;
+    font-size: 0.8rem;
     color: var(--ink-soft);
+    font-weight: 600;
+}
+
+tr.anomaly {
+    background: rgba(143, 61, 47, 0.08);
 }
 
 .pager {
     margin-top: 1rem;
     display: flex;
-    gap: 1r75rem;
-}
-
-.login-form label {
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 0.2m;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .pager a {
@@ -322,7 +300,12 @@ th {
 
 .login-form {
     display: grid;
-    gap: 0.45rem;
+    gap: 0.65rem;
+}
+
+.login-form label {
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .error-message {
@@ -492,6 +475,7 @@ th {
 
     .filters {
         flex-direction: column;
+        align-items: stretch;
         gap: 0.5rem;
         width: 100%;
     }
@@ -509,7 +493,7 @@ th {
 
     .panel h2 {
         font-size: 1.4rem;
-        margin: 0 0 0.8rem 0;
+        margin: 0 0 0.8rem;
     }
 
     .table-wrap {
