@@ -1,0 +1,2 @@
+2026-04-16 07:46:03 | [SENSOR ERROR] Test error
+2026-04-16 07:46:13 | [SENSOR ERROR] Test error

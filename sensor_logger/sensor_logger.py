@@ -14,7 +14,8 @@ import requests
 FRIDGE_TYPE = sys.argv[1]
 FRIDGE_NUMBER = sys.argv[2]
 LOG_INTERVAL = 10
-CSV_FILENAME = "sensor_log" + "_" + FRIDGE_TYPE + "_" + FRIDGE_NUMBER + ".csv"
+CSV_FILENAME = f"logs/sensor_log_{FRIDGE_TYPE}_{FRIDGE_NUMBER}.csv"
+ERROR_LOG = f"error/error_log_{FRIDGE_TYPE}_{FRIDGE_NUMBER}.txt"
 TEMP_OFFSET = -7
 
 # API config
@@ -25,6 +26,14 @@ API_HEADERS = {
 }
 API_ENDPOINT = f"sensor/{FRIDGE_TYPE}_{FRIDGE_NUMBER}"
 
+# Error logging
+def log_error(source, error):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message = f"{timestamp} | [{source}] {error}\n"
+    print(message.strip())
+    with open(ERROR_LOG, "a") as f:
+        f.write(message)
+
 # Sensor initialisation
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -34,7 +43,7 @@ try:
     bme280 = BME280(i2c_dev=i2c_bus)
     ltr559 = LTR559()
 except Exception as e:
-    print(f"[INIT ERROR] Could not initialise sensors: {e}")
+    log_error("INIT ERROR", e)
     sys.exit(1)
 
 # Sets up output file
@@ -55,7 +64,7 @@ try:
     else:
         print("Appending to existing log file:", CSV_FILENAME)
 except Exception as e:
-    print(f"[CSV ERROR] Could not open log file: {e}")
+    log_error("CSV ERROR", e)
     sys.exit(1)
 
 # Helper functions
@@ -74,7 +83,7 @@ def post_to_api(timestamp, temperature, humidity, pressure, door, light):
         r.raise_for_status()
         print(f"[API OK] Posted to {API_ENDPOINT}")
     except requests.RequestException as e:
-        print(f"[API FAIL] {e}")
+        log_error("API FAIL", e)
 
 def read_door_status(pin):
     if GPIO.input(pin) == 0:
@@ -107,7 +116,7 @@ try:
             door = read_door_status(5)
             light = read_light_sensor()
         except Exception as e:
-            print(f"[SENSOR ERROR] {e}")
+            log_error("SENSOR ERROR", e)
             time.sleep(LOG_INTERVAL)
             continue
 
