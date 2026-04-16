@@ -9,6 +9,7 @@ from smbus2 import SMBus
 from bme280 import BME280
 from ltr559 import LTR559
 import sys
+import requests
 
 # Settings
 FRIDGE_TYPE = sys.argv[1]
@@ -16,55 +17,12 @@ FRIDGE_NUMBER = sys.argv[2]
 LOG_INTERVAL = 10
 CSV_FILENAME = "sensor_log" + "_" + FRIDGE_TYPE + "_" + FRIDGE_NUMBER + ".csv"
 TEMP_OFFSET  = -7
-
-# Database config (optional — set these env vars to enable direct DB writes)
-DB_NAME     = os.getenv("DB_NAME")
-DB_USER     = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST     = os.getenv("DB_HOST", "localhost")
-DB_PORT     = os.getenv("DB_PORT", "5432")
-
-db_conn = None
-if DB_NAME:
-    try:
-        import psycopg2
-        db_conn = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT,
-        )
-        db_conn.autocommit = True
-        print("Connected to database.")
-    except Exception as e:
-        print(f"Warning: could not connect to database ({e}). Falling back to CSV only.")
-        db_conn = None
-
-
-def insert_db(timestamp, temperature, humidity, pressure, door, light):
-    if db_conn is None:
-        return
-    with db_conn.cursor() as cur:
-        cur.execute(
-            """
-            INSERT INTO monitor_sensorreading
-                (timestamp, temperature_c, humidity_pct, pressure_hpa,
-                 door_status, light_lux, fridge_type, fridge_number, safety_status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            (
-                timestamp,
-                temperature,
-                humidity,
-                pressure,
-                door,
-                light,
-                FRIDGE_TYPE,
-                int(FRIDGE_NUMBER),
-                None,  # safety_status classified separately by R script
-            ),
-        )
+API_BASE = "https://dashboard.pilsworth.org/-/insert"
+API_HEADERS = {
+    "Authorization": "Bearer Team12FridgeFreezer",
+    "Content-Type": "application/json"
+}
+API_ENDPOINT = f"sensor/{FRIDGE_TYPE}_{FRIDGE_NUMBER}"
 
 
 # Sensor initialization
@@ -94,6 +52,22 @@ else:
     print("Appending to existing log file:", CSV_FILENAME)
 
 # Helper functions
+def post_to_api(timestamp, temperature, humidity, pressure, door, light):
+    payload = [{
+        "timestamp": timestamp,
+        "recorded_at": timestamp[:16],
+        "temperature_c": temperature,
+        "humidity_pct": humidity,
+        "pressure_hpa": pressure,
+        "door_status": door,
+        "light_lux": light
+    }]
+    try:
+        r = requests.post(API_BASE + "/" + API_ENDPOINT, headers=API_HEADERS, json=payload, timeout=10)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        print(f"[API FAIL] {e}")
+        
 def read_door_status(pin):
     if GPIO.input(pin) == 0:
         return "CLOSED"
@@ -128,8 +102,8 @@ try:
 
         writer.writerow([timestamp, temperature, humidity, pressure, door, light])
         csv_file.flush()
-
-        insert_db(timestamp, temperature, humidity, pressure, door, light)
+        
+        post_to_api(timestamp, temperature, humidity, pressure, door, light)
 
         print(f"{timestamp} | Door Status: {door} | "
               f"Temp: {temperature}C | Humidity: {humidity}% | "
@@ -144,6 +118,4 @@ except KeyboardInterrupt:
 finally:
     csv_file.close()
     GPIO.cleanup()
-    if db_conn:
-        db_conn.close()
     print("Cleanup done. Data saved to:", CSV_FILENAME)
