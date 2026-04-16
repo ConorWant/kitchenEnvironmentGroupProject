@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% block auto_refresh %}
+<meta http-equiv="refresh" content="10">
+{% endblock %}
 <section class="toolbar">
     <form method="get" class="filters">
         <label for="source">Unit</label>
