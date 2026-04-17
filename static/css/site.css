@@ -50,13 +50,13 @@ body {
 
 .brand-wrap {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    align-items: flex-end;
+    gap: 0.25rem;
 }
 
 .brand-logo {
-    width: 250px;
-    height: 250px;
+    width: auto;
+    height: 120px;
 }
 
 .eyebrow {
@@ -70,7 +70,7 @@ body {
 .brand {
     margin: 0;
     font-family: "Cormorant Garamond", serif;
-    font-size: clamp(1.25rem, 2.7vw, 2rem);
+    font-size: clamp(1rem, 2.2vw, 1.6rem);
     line-height: 0.95;
     font-weight: 600;
 }
@@ -113,7 +113,7 @@ body {
 }
 
 .shell {
-    padding: 2rem 6vw;
+    padding: 0.75rem 6vw;
     display: grid;
     gap: 1.5rem;
 }
@@ -371,7 +371,7 @@ tr.anomaly {
     }
 
     .brand {
-        font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+        font-size: clamp(0.95rem, 2.1vw, 1.45rem);
     }
 
     .shell {
@@ -431,7 +431,7 @@ tr.anomaly {
     }
 
     .brand {
-        font-size: clamp(0.95rem, 2.2vw, 1.45rem);
+        font-size: clamp(0.85rem, 2vw, 1.2rem);
         margin-top: 0;
     }
 
@@ -617,7 +617,7 @@ tr.anomaly {
     }
 
     .brand {
-        font-size: clamp(0.85rem, 2vw, 1.15rem);
+        font-size: clamp(0.78rem, 1.8vw, 1rem);
     }
 
     .eyebrow {
