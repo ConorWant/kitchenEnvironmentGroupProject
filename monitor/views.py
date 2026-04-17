@@ -105,7 +105,7 @@ def history_view(request):
 def live_dashboard_view(request):
     context = {
         "page_title": "Live Dashboard",
-        "dashboard_url": "https://dashboard.diffa.co.uk/-/dashboards/fridge-monitor",
+        "dashboard_url": "https://dashboard.pilsworth.org/-/dashboards/fridge-monitor",
     }
     return render(request, "monitor/live_dashboard.html", context)
 
