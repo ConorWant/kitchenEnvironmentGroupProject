@@ -1,13 +1,13 @@
 :root {
-    --bg: #f0ede6;
-    --bg-soft: #e4ddd2;
-    --ink: #1f1911;
-    --ink-soft: #4f4638;
-    --accent: #8f3d2f;
-    --accent-soft: #cf9c6e;
-    --panel: rgba(255, 252, 246, 0.8);
-    --line: rgba(31, 25, 17, 0.16);
-    --shadow: 0 20px 40px rgba(31, 25, 17, 0.12);
+    --bg: #edf4fc;
+    --bg-soft: #deebf8;
+    --ink: #0c447c;
+    --ink-soft: #2b5f93;
+    --accent: #185fa5;
+    --accent-soft: #378add;
+    --panel: rgba(255, 255, 255, 0.82);
+    --line: rgba(12, 68, 124, 0.18);
+    --shadow: 0 20px 40px rgba(12, 68, 124, 0.14);
 }
 
 * {
@@ -24,7 +24,7 @@ body {
     margin: 0;
     font-family: "Manrope", sans-serif;
     color: var(--ink);
-    background: radial-gradient(circle at 0% 0%, #f9f5ee 0%, var(--bg) 45%, var(--bg-soft) 100%);
+    background: radial-gradient(circle at 0% 0%, #f6fbff 0%, var(--bg) 45%, var(--bg-soft) 100%);
     min-height: 100vh;
 }
 
@@ -33,8 +33,8 @@ body {
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(800px 280px at 90% -10%, rgba(143, 61, 47, 0.22), transparent 60%),
-        radial-gradient(520px 260px at -10% 95%, rgba(207, 156, 110, 0.22), transparent 62%);
+        radial-gradient(800px 280px at 90% -10%, rgba(24, 95, 165, 0.22), transparent 60%),
+        radial-gradient(520px 260px at -10% 95%, rgba(55, 138, 221, 0.2), transparent 62%);
     z-index: -1;
 }
 
