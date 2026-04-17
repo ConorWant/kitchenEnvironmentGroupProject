@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+    <h2>Registration successful</h2>
+    <p>
+        Please check your email{% if email %} ({{ email }}){% endif %} to verify your account.
+    </p>
+    <p>
+        Once verified, you can sign in using the link below.
+    </p>
+    <a href="{% url 'login' %}">Go to login</a>
+</section>
+{% endblock %}

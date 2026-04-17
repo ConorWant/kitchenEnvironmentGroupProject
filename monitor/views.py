@@ -31,7 +31,14 @@ def user_register_view(request):
                 [user.email],
                 fail_silently=False,
             )
-            return HttpResponse('Registration successful! Please check your email to verify your account.')
+            return render(
+                request,
+                "registration/register_success.html",
+                {
+                    "page_title": "Registration Successful",
+                    "email": user.email,
+                },
+            )
     else:
         form = CustomUserCreationForm()
     return render(request, "registration/register.html", {"form": form})
