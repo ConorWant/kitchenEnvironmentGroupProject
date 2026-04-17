@@ -1,0 +1,16 @@
+<svg width="280" height="145" viewBox="196 55 288 145" xmlns="http://www.w3.org/2000/svg">
+  <title>KitchenSense Logo</title>
+  <desc>KitchenSense logo with blue hex badge icon and wordmark</desc>
+
+  <polygon points="340,60 374,79 374,117 340,136 306,117 306,79" fill="#185FA5"/>
+  <rect x="336" y="78" width="8" height="30" rx="4" fill="white" opacity="0.95"/>
+  <circle cx="340" cy="110" r="6" fill="white" opacity="0.95"/>
+  <rect x="338" y="86" width="4" height="20" rx="2" fill="#378ADD"/>
+  <circle cx="340" cy="110" r="3.5" fill="#378ADD"/>
+  <path d="M354 84 Q361 77 368 84" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+  <path d="M357 88 Q361 84 365 88" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="361" cy="91" r="2" fill="white"/>
+
+  <text x="340" y="168" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="500" fill="#0C447C">KitchenSense</text>
+  <text x="340" y="190" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#378ADD" letter-spacing="2">ENVIRONMENT MONITOR</text>
+</svg>

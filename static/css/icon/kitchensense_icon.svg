@@ -1,0 +1,11 @@
+<svg width="68" height="76" viewBox="0 0 68 76" xmlns="http://www.w3.org/2000/svg">
+  <title>KitchenSense Icon</title>
+  <polygon points="34,0 68,19 68,57 34,76 0,57 0,19" fill="#185FA5"/>
+  <rect x="30" y="18" width="8" height="30" rx="4" fill="white" opacity="0.95"/>
+  <circle cx="34" cy="50" r="6" fill="white" opacity="0.95"/>
+  <rect x="32" y="26" width="4" height="20" rx="2" fill="#378ADD"/>
+  <circle cx="34" cy="50" r="3.5" fill="#378ADD"/>
+  <path d="M48 24 Q55 17 62 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+  <path d="M51 28 Q55 24 59 28" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="55" cy="31" r="2" fill="white"/>
+</svg>
