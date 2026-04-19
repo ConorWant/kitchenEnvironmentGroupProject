@@ -16,7 +16,7 @@ FRIDGE_NUMBER = sys.argv[2]
 LOG_INTERVAL = 10
 CSV_FILENAME = f"logs/sensor_log_{FRIDGE_TYPE}_{FRIDGE_NUMBER}.csv"
 ERROR_LOG = f"error/error_log_{FRIDGE_TYPE}_{FRIDGE_NUMBER}.txt"
-TEMP_OFFSET = -7
+TEMP_OFFSET = -4
 
 # API config
 API_BASE = "https://dashboard.pilsworth.org/-/insert"
