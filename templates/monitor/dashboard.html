@@ -140,4 +140,121 @@ setInterval(updateDashboard, 10000);
     <p>No readings available yet.</p>
     {% endif %}
 </section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<section class="panel">
+    <h2>Temperature (24h)</h2>
+    <canvas id="chart-temp" height="80"></canvas>
+</section>
+
+<section class="panel">
+    <h2>Humidity (24h)</h2>
+    <canvas id="chart-humidity" height="80"></canvas>
+</section>
+
+<section class="panel">
+    <h2>Pressure (24h)</h2>
+    <canvas id="chart-pressure" height="80"></canvas>
+</section>
+
+<script>
+const CHART_COLORS = ["#185fa5", "#e06030", "#2e7d32", "#8b4fa8"];
+
+function makeChart(id, unit) {
+    return new Chart(document.getElementById(id), {
+        type: "line",
+        data: { labels: [], datasets: [] },
+        options: {
+            responsive: true,
+            animation: false,
+            plugins: {
+                legend: { display: true },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y} ${unit}`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { maxTicksLimit: 12, color: "#2b5f93" },
+                    grid: { color: "rgba(12,68,124,0.08)" }
+                },
+                y: {
+                    ticks: { color: "#2b5f93" },
+                    grid: { color: "rgba(12,68,124,0.08)" }
+                }
+            }
+        }
+    });
+}
+
+const tempChart = makeChart("chart-temp", "°C");
+const humidityChart = makeChart("chart-humidity", "%");
+const pressureChart = makeChart("chart-pressure", "hPa");
+
+function updateCharts() {
+    const source = new URLSearchParams(window.location.search).get("source") || "all";
+    fetch(`/chart-data/?source=${source}`)
+        .then(r => r.json())
+        .then(data => {
+            const unitNames = Object.keys(data.units);
+
+            tempChart.data.datasets = [];
+            humidityChart.data.datasets = [];
+            pressureChart.data.datasets = [];
+
+            unitNames.forEach((name, i) => {
+                const color = CHART_COLORS[i % CHART_COLORS.length];
+                const unit = data.units[name];
+
+                tempChart.data.labels = unit.labels;
+                humidityChart.data.labels = unit.labels;
+                pressureChart.data.labels = unit.labels;
+
+                tempChart.data.datasets.push({
+                    label: name,
+                    data: unit.temperature,
+                    borderColor: color,
+                    backgroundColor: color + "22",
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: true,
+                });
+
+                humidityChart.data.datasets.push({
+                    label: name,
+                    data: unit.humidity,
+                    borderColor: color,
+                    backgroundColor: color + "22",
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: true,
+                });
+
+                pressureChart.data.datasets.push({
+                    label: name,
+                    data: unit.pressure,
+                    borderColor: color,
+                    backgroundColor: color + "22",
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: true,
+                });
+            });
+
+            tempChart.update();
+            humidityChart.update();
+            pressureChart.update();
+        })
+        .catch(err => console.error("Chart update failed:", err));
+}
+
+updateCharts();
+setInterval(updateCharts, 10000);
+</script>
 {% endblock %}

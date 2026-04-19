@@ -8,6 +8,9 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.http import JsonResponse
 import json
+from django.utils import timezone
+from datetime import timedelta
+
 
 from .models import SensorReading
 from .services import build_summary, get_readings
@@ -173,6 +176,30 @@ def dashboard_data_view(request):
         "latest_status": summary["latest_status"],
         "recent_readings": recent,
     })
+
+@login_required
+def chart_data_view(request):
+    selected_source = request.GET.get("source", "all")
+    since = timezone.now() - timedelta(hours=24)
+
+    qs = SensorReading.objects.filter(timestamp__gte=since).order_by("timestamp")
+
+    if selected_source != "all":
+        fridge_type, fridge_number = selected_source.split("_", maxsplit=1)
+        qs = qs.filter(fridge_type=fridge_type, fridge_number=int(fridge_number))
+
+    # Group by unit
+    units = {}
+    for r in qs.values("timestamp", "temperature_c", "humidity_pct", "pressure_hpa", "fridge_type", "fridge_number"):
+        key = f"{r['fridge_type'].capitalize()} {r['fridge_number']}"
+        if key not in units:
+            units[key] = {"labels": [], "temperature": [], "humidity": [], "pressure": []}
+        units[key]["labels"].append(r["timestamp"].strftime("%H:%M"))
+        units[key]["temperature"].append(round(r["temperature_c"], 2))
+        units[key]["humidity"].append(round(r["humidity_pct"], 2))
+        units[key]["pressure"].append(round(r["pressure_hpa"], 2))
+
+    return JsonResponse({"units": units})
 
 
    # from .services import is_anomalous
