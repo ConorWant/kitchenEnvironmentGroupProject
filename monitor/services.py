@@ -152,8 +152,10 @@ def get_readings(selected_source="all", sort_order="desc", door_filter="all", li
         reverse=sort_order != "asc"
     )
 
-    if limit is not None:
+    if limit is not None and limit > 0:
         all_readings = all_readings[:limit]
+    elif limit == 0:
+        all_readings = []
 
     source_options = [{"slug": "all", "label": "All Units"}] + [
         {

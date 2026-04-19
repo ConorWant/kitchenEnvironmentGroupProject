@@ -23,13 +23,19 @@
             <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Oldest first</option>
         </select>
 
+        <label for="at_minute">Date &amp; Time</label>
+        <input id="at_minute" name="at_minute" type="datetime-local" step="60" value="{{ at_minute }}">
+
         <button type="submit">Apply</button>
     </form>
+    {% if datetime_error %}
+    <p class="error-message">{{ datetime_error }}</p>
+    {% endif %}
 </section>
 
 <section class="panel">
     <h2>Reading History</h2>
-    {% if dataset.has_data %}
+    {% if page_obj.paginator.count > 0 %}
     <div class="table-wrap">
         <table>
             <thead>
@@ -62,11 +68,11 @@
     </div>
     <div class="pager">
         {% if page_obj.has_previous %}
-        <a href="?source={{ selected_source }}&door={{ door_filter }}&sort={{ sort_order }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        <a href="?source={{ selected_source }}&door={{ door_filter }}&sort={{ sort_order }}&at_minute={{ at_minute|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>
         {% endif %}
         <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-        <a href="?source={{ selected_source }}&door={{ door_filter }}&sort={{ sort_order }}&page={{ page_obj.next_page_number }}">Next</a>
+        <a href="?source={{ selected_source }}&door={{ door_filter }}&sort={{ sort_order }}&at_minute={{ at_minute|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>
         {% endif %}
     </div>
     {% else %}

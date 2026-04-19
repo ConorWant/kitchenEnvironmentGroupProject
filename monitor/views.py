@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
-from datetime import timedelta
+from datetime import datetime, timedelta
 import json
 
 from .models import SensorReading, MonitoredUnit, UNIT_TYPE_CHOICES
@@ -99,16 +99,46 @@ def history_view(request):
     selected_source = request.GET.get("source", "all")
     sort_order = request.GET.get("sort", "desc")
     door_filter = request.GET.get("door", "all")
+    at_minute = request.GET.get("at_minute", "").strip()
+    datetime_error = ""
+
+    qs = SensorReading.objects.all()
+
+    if selected_source != "all":
+        fridge_type, fridge_number = selected_source.rsplit("_", maxsplit=1)
+        qs = qs.filter(fridge_type=fridge_type, fridge_number=int(fridge_number))
+
+    if door_filter != "all":
+        qs = qs.filter(door_status__iexact=door_filter)
+
+    target_page = request.GET.get("page")
+    if at_minute:
+        try:
+            target_dt = datetime.fromisoformat(at_minute)
+            if timezone.is_naive(target_dt):
+                target_dt = timezone.make_aware(target_dt, timezone.get_current_timezone())
+
+            # Jump to the page where this timestamp would appear under current filters/sort.
+            if sort_order == "asc":
+                before_count = qs.filter(timestamp__lt=target_dt).count()
+            else:
+                before_count = qs.filter(timestamp__gt=target_dt).count()
+            target_page = (before_count // 40) + 1
+        except ValueError:
+            datetime_error = "Please enter a valid date and time."
+
+    order_by = "timestamp" if sort_order == "asc" else "-timestamp"
+    qs = qs.order_by(order_by)
+
+    paginator = Paginator(qs, 40)
+    page_obj = paginator.get_page(target_page)
 
     dataset = get_readings(
         selected_source=selected_source,
         sort_order=sort_order,
         door_filter=door_filter,
-        limit=None,
+        limit=0,
     )
-
-    paginator = Paginator(dataset["readings"], 40)
-    page_obj = paginator.get_page(request.GET.get("page"))
 
     context = {
         "page_title": "History",
@@ -117,8 +147,21 @@ def history_view(request):
         "selected_source": selected_source,
         "sort_order": sort_order,
         "door_filter": door_filter,
+        "at_minute": at_minute,
+        "datetime_error": datetime_error,
     }
     return render(request, "monitor/history.html", context)
+
+
+@login_required
+@user_passes_test(lambda user: user.is_superuser)
+def live_dashboard_view(request):
+    context = {
+        "page_title": "Live Dashboard",
+        "dashboard_url": "https://dashboard.pilsworth.org/-/dashboards/fridge-monitor",
+    }
+    return render(request, "monitor/live_dashboard.html", context)
+
 
 @login_required
 @user_passes_test(lambda user: user.is_staff)
