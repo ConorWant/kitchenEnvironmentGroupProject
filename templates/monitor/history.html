@@ -76,7 +76,10 @@
         {% endif %}
     </div>
     {% else %}
-    <p>No readings available for this filter.</p>
+    <div class="empty-state panel">
+        <h3>No readings found</h3>
+        <p>No readings available for this filter.</p>
+    </div>
     {% endif %}
 </section>
 {% endblock %}

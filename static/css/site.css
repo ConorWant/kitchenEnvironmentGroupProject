@@ -45,12 +45,12 @@ body {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 1.25rem;
-    padding: 0.35rem 6vw 0.2rem;
-    border-bottom: 1px solid var(--line);
+    padding: 0.45rem 6vw 0.3rem;
+    border-bottom: 1px solid rgba(12, 68, 124, 0.12);
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(237, 244, 252, 0.92);
+    background: rgba(225, 239, 252, 0.95);
     backdrop-filter: blur(8px);
 }
 
@@ -102,7 +102,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s ease;
+    transition: transform 0.25s ease, color 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.site-nav a.nav-active {
+    background: rgba(24, 95, 165, 0.12);
+    border-color: rgba(24, 95, 165, 0.4);
+    color: var(--accent);
+    font-weight: 700;
 }
 
 .nav-logout {
@@ -119,15 +126,15 @@ body {
 }
 
 .shell {
-    padding: 0.75rem 6vw;
+    padding: 0.9rem 6vw;
     display: grid;
-    gap: 1.5rem;
+    gap: 1.8rem;
 }
 
 .site-footer {
     margin-top: 1rem;
-    padding: 1.15rem 6vw 1.35rem;
-    border-top: 1px solid var(--line);
+    padding: 0.95rem 6vw 1.05rem;
+    border-top: 1px solid rgba(12, 68, 124, 0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -138,7 +145,7 @@ body {
     right: 0;
     bottom: 0;
     z-index: 900;
-    background: rgba(237, 244, 252, 0.96);
+    background: rgba(225, 239, 252, 0.97);
     backdrop-filter: blur(8px);
 }
 
@@ -158,18 +165,19 @@ body {
 .footer-nav a {
     text-decoration: none;
     color: var(--ink);
-    border: 1px solid var(--line);
+    border: 1px solid rgba(12, 68, 124, 0.12);
     border-radius: 999px;
-    padding: 0.5rem 0.85rem;
-    font-size: 0.92rem;
-    background: rgba(255, 255, 255, 0.68);
-    transition: all 0.2s ease;
+    padding: 0.42rem 0.72rem;
+    font-size: 0.88rem;
+    background: rgba(255, 255, 255, 0.56);
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 .footer-nav a:hover,
 .footer-nav a:focus-visible {
-    border-color: var(--accent);
+    border-color: rgba(24, 95, 165, 0.45);
     color: var(--accent);
+    background: rgba(24, 95, 165, 0.08);
 }
 
 .toolbar {
@@ -223,19 +231,27 @@ body {
     cursor: pointer;
     border: 1px solid transparent;
     border-radius: 10px;
-    background: linear-gradient(110deg, var(--accent), #9e5932);
+    background: var(--accent);
     color: #fff;
     font: inherit;
     font-size: 16px;
     font-weight: 700;
     padding: 0.75rem 1.25rem;
     min-height: 44px;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .filters button:hover,
 .login-form button:hover {
-    filter: brightness(1.05);
+    background: var(--accent-soft);
+}
+
+.filters button:hover,
+.login-form button:hover,
+.footer-nav a:hover,
+.site-nav a:hover,
+.nav-logout:hover {
+    transform: translateY(-1px);
 }
 
 .filters select:focus,
@@ -244,8 +260,8 @@ body {
 .login-form button:focus-visible,
 .site-nav a:focus-visible,
 .nav-logout:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline: 3px solid rgba(24, 95, 165, 0.28);
+    outline-offset: 3px;
 }
 
 .stats-grid {
@@ -266,7 +282,7 @@ body {
 .stat-card {
     border-radius: 16px;
     padding: 1.2rem;
-    transition: transform 0.2s ease;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     position: relative;
     z-index: 0;
     transform-origin: center;
@@ -274,9 +290,10 @@ body {
 
 .stat-card:hover,
 .stat-card:focus-within {
-    transform: scale(1.08);
+    transform: scale(1.045);
     z-index: 10;
-    border-color: #1f3a5a;
+    border-color: rgba(24, 95, 165, 0.55);
+    box-shadow: 0 24px 44px rgba(12, 68, 124, 0.18);
 }
 
 .stat-card h2 {
@@ -299,6 +316,24 @@ body {
     padding: 1rem;
 }
 
+.empty-state {
+    display: grid;
+    gap: 0.35rem;
+    place-items: start;
+}
+
+.empty-state h3 {
+    margin: 0;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin: 0;
+    color: var(--ink-soft);
+}
+
 .panel h2 {
     margin: 0 0 0.8rem;
     font-family: "Cormorant Garamond", serif;
@@ -319,16 +354,33 @@ th,
 td {
     text-align: left;
     border-bottom: 1px solid var(--line);
-    padding: 0.85rem 0.6rem;
+    padding: 0.9rem 0.7rem;
     font-size: 0.95rem;
+}
+
+tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+tbody tr:nth-child(even) {
+    background: rgba(225, 239, 252, 0.85);
+}
+
+tbody tr:hover {
+    background: rgba(210, 229, 248, 0.92);
 }
 
 th {
     text-transform: uppercase;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.05em;
     font-size: 0.8rem;
     color: var(--ink-soft);
     font-weight: 600;
+    background: rgba(225, 239, 252, 0.98);
+    border-bottom: 2px solid rgba(12, 68, 124, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 tr.anomaly {
@@ -441,8 +493,8 @@ tr.anomaly {
     }
 
     .shell {
-        padding: 1.25rem;
-        gap: 1.2rem;
+        padding: 1.15rem;
+        gap: 1.35rem;
     }
 
     .site-footer {
