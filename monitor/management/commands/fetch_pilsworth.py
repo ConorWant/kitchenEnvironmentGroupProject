@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
 from monitor.models import SensorReading
+from monitor.services import classify_reading
 
 API_BASE = "https://dashboard.pilsworth.org/sensor"
 API_HEADERS = {"Authorization": "Bearer Team12FridgeFreezer"}
@@ -58,6 +59,7 @@ class Command(BaseCommand):
                         light_lux=row["light_lux"],
                         fridge_type=fridge_type,
                         fridge_number=fridge_number,
+                        safety_status=classify_reading(row["temperature_c"], row["light_lux"]),
                     )
                     total_created += 1
 
