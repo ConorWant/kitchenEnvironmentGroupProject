@@ -6,6 +6,8 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.http import JsonResponse
+import json
 
 from .models import SensorReading
 from .services import build_summary, get_readings
@@ -132,6 +134,41 @@ def management_view(request):
         "sources": sources,
     }
     return render(request, "monitor/management.html", context)
+
+@login_required
+def dashboard_data_view(request):
+    selected_source = request.GET.get("source", "all")
+    dataset = get_readings(
+        selected_source=selected_source,
+        sort_order="desc",
+        door_filter="all",
+        limit=120,
+    )
+    readings = dataset["readings"]
+    summary = build_summary(readings)
+
+    recent = []
+    for r in readings[:12]:
+        recent.append({
+            "timestamp": r["timestamp"].strftime("%Y-%m-%d %H:%M:%S") if hasattr(r["timestamp"], "strftime") else str(r["timestamp"]),
+            "fridge_type": r["fridge_type"],
+            "fridge_number": r["fridge_number"],
+            "temperature_c": round(r["temperature_c"], 2),
+            "humidity_pct": round(r["humidity_pct"], 2),
+            "pressure_hpa": round(r["pressure_hpa"], 2),
+            "door_status": r["door_status"],
+            "light_lux": round(r["light_lux"], 2),
+            "safety_status": r.get("safety_status") or "",
+        })
+
+    return JsonResponse({
+        "latest_temp": round(summary["latest"]["temperature_c"], 2) if summary["latest"] else None,
+        "avg_humidity": round(summary["avg_humidity"], 2) if summary["avg_humidity"] else None,
+        "avg_pressure": round(summary["avg_pressure"], 2) if summary["avg_pressure"] else None,
+        "open_events": summary["open_events"],
+        "latest_status": summary["latest_status"],
+        "recent_readings": recent,
+    })
 
 
    # from .services import is_anomalous

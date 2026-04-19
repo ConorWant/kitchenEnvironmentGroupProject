@@ -2,8 +2,41 @@
 
 {% block content %}
 {% block auto_refresh %}
-<meta http-equiv="refresh" content="10">
+<script>
+function updateDashboard() {
+    const source = new URLSearchParams(window.location.search).get("source") || "all";
+    fetch(`/dashboard-data/?source=${source}`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById("stat-temp").textContent = data.latest_temp !== null ? data.latest_temp + " C" : "--";
+            document.getElementById("stat-humidity").textContent = data.avg_humidity !== null ? data.avg_humidity + " %" : "--";
+            document.getElementById("stat-pressure").textContent = data.avg_pressure !== null ? data.avg_pressure + " hPa" : "--";
+            document.getElementById("stat-door").textContent = data.open_events;
+
+            const alert = document.getElementById("alert-unsafe");
+            if (alert) alert.style.display = data.latest_status === "Unsafe" ? "" : "none";
+
+            const tbody = document.getElementById("readings-tbody");
+            tbody.innerHTML = data.recent_readings.map(r => `
+                <tr>
+                    <td>${r.timestamp}</td>
+                    <td>${r.fridge_type.charAt(0).toUpperCase() + r.fridge_type.slice(1)} ${r.fridge_number}</td>
+                    <td>${r.temperature_c}</td>
+                    <td>${r.humidity_pct}</td>
+                    <td>${r.pressure_hpa}</td>
+                    <td>${r.door_status}</td>
+                    <td>${r.light_lux}</td>
+                    <td class="status-${(r.safety_status || 'unknown').toLowerCase()}">${r.safety_status || "--"}</td>
+                </tr>
+            `).join("");
+        })
+        .catch(err => console.error("Dashboard update failed:", err));
+}
+
+setInterval(updateDashboard, 10000);
+</script>
 {% endblock %}
+
 <section class="toolbar">
     <form method="get" class="filters">
         <label for="source">Unit</label>
@@ -24,24 +57,28 @@
 <section class="stats-grid">
     <article class="stat-card">
         <h2>Latest Temp</h2>
-        <p>{% if summary.latest %}{{ summary.latest.temperature_c|floatformat:2 }} C{% else %}--{% endif %}</p>
+        <p id="stat-temp">{% if summary.latest %}{{ summary.latest.temperature_c|floatformat:2 }} C{% else %}--{% endif %}</p>
     </article>
     <article class="stat-card">
         <h2>Average Humidity</h2>
-        <p>{% if summary.avg_humidity %}{{ summary.avg_humidity|floatformat:2 }} %{% else %}--{% endif %}</p>
+        <p id="stat-humidity">{% if summary.avg_humidity %}{{ summary.avg_humidity|floatformat:2 }} %{% else %}--{% endif %}</p>
     </article>
     <article class="stat-card">
         <h2>Average Pressure</h2>
-        <p>{% if summary.avg_pressure %}{{ summary.avg_pressure|floatformat:2 }} hPa{% else %}--{% endif %}</p>
+        <p id="stat-pressure">{% if summary.avg_pressure %}{{ summary.avg_pressure|floatformat:2 }} hPa{% else %}--{% endif %}</p>
     </article>
     <article class="stat-card">
         <h2>Door Open Events</h2>
-        <p>{{ summary.open_events }}</p>
+        <p id="stat-door">{{ summary.open_events }}</p>
     </article>
 </section>
 
 {% if summary.latest_status == "Unsafe" %}
-<div class="alert-unsafe">
+<div class="alert-unsafe" id="alert-unsafe">
+    Warning: Latest reading is classified as UNSAFE (temp &gt; 8&deg;C or door left open).
+</div>
+{% else %}
+<div class="alert-unsafe" id="alert-unsafe" style="display:none;">
     Warning: Latest reading is classified as UNSAFE (temp &gt; 8&deg;C or door left open).
 </div>
 {% endif %}
@@ -63,9 +100,9 @@
                     <th>Status</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="readings-tbody">
                 {% for reading in recent_readings %}
-                <tr {% if reading.anomalous %}class="anomaly"{% endif %}>
+                <tr>
                     <td>{{ reading.timestamp|date:"Y-m-d H:i:s" }}</td>
                     <td>{{ reading.fridge_type|title }} {{ reading.fridge_number }}</td>
                     <td>{{ reading.temperature_c|floatformat:2 }}</td>
