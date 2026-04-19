@@ -18,13 +18,16 @@ function updateDashboard() {
             document.getElementById("stat-door").textContent = data.open_events;
 
             const alert = document.getElementById("alert-unsafe");
-            if (alert) alert.style.display = data.latest_status === "Unsafe" ? "" : "none";
+            if (alert) {
+                alert.textContent = data.alert_message;
+                alert.style.display = data.latest_status === "Unsafe" ? "" : "none";
+            }
 
             const tbody = document.getElementById("readings-tbody");
             tbody.innerHTML = data.recent_readings.map(r => `
                 <tr>
                     <td>${r.timestamp}</td>
-                    <td>${r.fridge_type.charAt(0).toUpperCase() + r.fridge_type.slice(1)} ${r.fridge_number}</td>
+                    <td>${r.fridge_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} ${r.fridge_number}</td>
                     <td>${r.temperature_c}</td>
                     <td>${r.humidity_pct}</td>
                     <td>${r.pressure_hpa}</td>

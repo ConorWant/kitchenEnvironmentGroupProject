@@ -2,28 +2,28 @@ import requests
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
-from monitor.models import SensorReading
+from monitor.models import SensorReading, MonitoredUnit
 from monitor.services import classify_reading
 
 API_BASE = "https://dashboard.pilsworth.org/sensor"
 API_HEADERS = {"Authorization": "Bearer Team12FridgeFreezer"}
-TABLES = [
-    ("fridge", 1),
-    ("freezer", 1),
-]
 
 class Command(BaseCommand):
     help = "Fetch latest readings from Pilsworth Datasette API"
 
     def handle(self, *args, **options):
-        for fridge_type, fridge_number in TABLES:
-            table = f"{fridge_type}_{fridge_number}"
+        units = MonitoredUnit.objects.filter(active=True)
+
+        for unit in units:
+            table = unit.datasette_table
+            unit_type = unit.unit_type
+            unit_number = unit.unit_number
             total_created = 0
 
             while True:
                 latest = SensorReading.objects.filter(
-                    fridge_type=fridge_type,
-                    fridge_number=fridge_number
+                    fridge_type=unit_type,
+                    fridge_number=unit_number
                 ).order_by("-timestamp").first()
 
                 if latest:
@@ -57,15 +57,20 @@ class Command(BaseCommand):
                         pressure_hpa=row["pressure_hpa"],
                         door_status=row["door_status"],
                         light_lux=row["light_lux"],
-                        fridge_type=fridge_type,
-                        fridge_number=fridge_number,
-                        safety_status=classify_reading(row["temperature_c"], row["light_lux"]),
+                        fridge_type=unit_type,
+                        fridge_number=unit_number,
+                        safety_status=classify_reading(
+                            row["temperature_c"],
+                            row["light_lux"],
+                            row["humidity_pct"],
+                            unit_type,
+                        ),
                     )
                     total_created += 1
 
                 self.stdout.write(f"[OK] {table}: {total_created} rows so far...")
 
                 if len(rows) < 1000:
-                    break  # last page
+                    break
 
             self.stdout.write(f"[DONE] {table}: {total_created} total new readings saved")

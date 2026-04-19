@@ -7,8 +7,8 @@
         <p>{{ db_count }}</p>
     </article>
     <article class="stat-card">
-        <h2>Distinct Units</h2>
-        <p>{{ sources|length }}</p>
+        <h2>Active Units</h2>
+        <p>{{ units|length }}</p>
     </article>
     <article class="stat-card">
         <h2>Data Input</h2>
@@ -21,14 +21,65 @@
 </section>
 
 <section class="panel">
-    <h2>Tracked Units</h2>
-    <ul class="unit-list">
-        {% for source in sources %}
-        <li>{{ source.fridge_type|title }} {{ source.fridge_number }}</li>
-        {% empty %}
-        <li>No unit records in database yet.</li>
-        {% endfor %}
-    </ul>
-    <p class="note">Use Django Admin to create or edit records.</p>
+    <h2>Live Fridge Monitor</h2>
+    <p>The live dashboard is hosted externally and cannot be embedded here.</p>
+    <a href="https://dashboard.pilsworth.org/-/dashboards/fridge-monitor" target="_blank" rel="noopener noreferrer">Open Live Dashboard</a>
+</section>
+
+<section class="panel">
+    <h2>Add New Unit</h2>
+    <form method="post" action="{% url 'monitor:add_unit' %}" class="filters">
+        {% csrf_token %}
+        <label for="unit_type">Unit Type</label>
+        <select id="unit_type" name="unit_type">
+            {% for value, label in unit_type_choices %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Add Unit</button>
+    </form>
+    <p class="note">Unit number and Datasette table name will be assigned automatically.</p>
+</section>
+
+<section class="panel">
+    <h2>Monitored Units</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Number</th>
+                    <th>Datasette Table</th>
+                    <th>Status</th>
+                    <th>Added</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for unit in units %}
+                <tr>
+                    <td>{{ unit.get_unit_type_display }}</td>
+                    <td>{{ unit.unit_number }}</td>
+                    <td>{{ unit.datasette_table }}</td>
+                    <td class="{% if unit.active %}status-safe{% else %}status-unknown{% endif %}">
+                        {% if unit.active %}Active{% else %}Inactive{% endif %}
+                    </td>
+                    <td>{{ unit.added_at|date:"Y-m-d" }}</td>
+                    <td>
+                        <form method="post" action="{% url 'monitor:toggle_unit' unit.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-logout">
+                                {% if unit.active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">No units configured yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="note">Inactive units will not be fetched. Use Django Admin to delete units permanently.</p>
 </section>
 {% endblock %}

@@ -30,3 +30,28 @@ class SensorReading(models.Model):
             f"{self.fridge_type}_{self.fridge_number} "
             f"{self.temperature_c:.2f}C"
         )
+
+
+UNIT_TYPE_CHOICES = [
+    ("fridge", "Fridge"),
+    ("freezer", "Freezer"),
+    ("fermentation_room", "Fermentation Room"),
+    ("wine_cooler", "Wine Cooler"),
+    ("dry_store", "Dry Store"),
+    ("blast_chiller", "Blast Chiller"),
+]
+
+
+class MonitoredUnit(models.Model):
+    unit_type = models.CharField(max_length=32, choices=UNIT_TYPE_CHOICES)
+    unit_number = models.PositiveSmallIntegerField()
+    datasette_table = models.CharField(max_length=64, unique=True)
+    active = models.BooleanField(default=True)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("unit_type", "unit_number")
+        ordering = ["unit_type", "unit_number"]
+
+    def __str__(self):
+        return f"{self.get_unit_type_display()} {self.unit_number} ({self.datasette_table})"

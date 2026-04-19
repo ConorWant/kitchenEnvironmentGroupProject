@@ -1,28 +1,36 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.http import HttpResponse
-from django.http import JsonResponse
-import json
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from datetime import timedelta
+import json
 
-
-from .models import SensorReading
-from .services import build_summary, get_readings
-from django.shortcuts import render, redirect
+from .models import SensorReading, MonitoredUnit, UNIT_TYPE_CHOICES
+from .services import build_summary, get_readings, UNIT_THRESHOLDS
 from .forms import CustomUserCreationForm
+
+
+def _build_alert_message(unit_type):
+    thresholds = UNIT_THRESHOLDS.get(unit_type, UNIT_THRESHOLDS["fridge"])
+    parts = [f"temp outside {thresholds['temp_min']}–{thresholds['temp_max']}°C"]
+    if thresholds["humidity_min"] is not None:
+        parts.append(f"humidity outside {thresholds['humidity_min']}–{thresholds['humidity_max']}%")
+    if thresholds["lux_max"] is not None:
+        parts.append(f"light > {thresholds['lux_max']} lux")
+    return "Warning: Latest reading is UNSAFE (" + ", ".join(parts) + ")."
+
 
 def user_register_view(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False  # Deactivate account until it is confirmed
+            user.is_active = False
             user.save()
             token = default_token_generator.make_token(user)
             uid = user.pk
@@ -47,7 +55,8 @@ def user_register_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, "registration/register.html", {"form": form})
-    
+
+
 def verify_email(request, uid, token):
     try:
         user = User.objects.get(pk=uid)
@@ -59,7 +68,7 @@ def verify_email(request, uid, token):
         user.save()
         return HttpResponse('Email verified! You can now log in.')
     else:
-        return HttpResponse('Invalid or expired token')    
+        return HttpResponse('Invalid or expired token')
 
 
 @login_required
@@ -111,32 +120,44 @@ def history_view(request):
     }
     return render(request, "monitor/history.html", context)
 
-
 @login_required
-@user_passes_test(lambda user: user.is_superuser)
-def live_dashboard_view(request):
+@user_passes_test(lambda user: user.is_staff)
+def management_view(request):
+    units = MonitoredUnit.objects.all().order_by("unit_type", "unit_number")
     context = {
-        "page_title": "Live Dashboard",
-        "dashboard_url": "https://dashboard.pilsworth.org/-/dashboards/fridge-monitor",
+        "page_title": "Management",
+        "db_count": SensorReading.objects.count(),
+        "units": units,
+        "unit_type_choices": UNIT_TYPE_CHOICES,
     }
-    return render(request, "monitor/live_dashboard.html", context)
+    return render(request, "monitor/management.html", context)
 
 
 @login_required
 @user_passes_test(lambda user: user.is_staff)
-def management_view(request):
-    sources = (
-        SensorReading.objects.values("fridge_type", "fridge_number")
-        .distinct()
-        .order_by("fridge_type", "fridge_number")
-    )
+def add_unit_view(request):
+    if request.method == "POST":
+        unit_type = request.POST.get("unit_type")
+        existing = MonitoredUnit.objects.filter(unit_type=unit_type).order_by("-unit_number").first()
+        unit_number = (existing.unit_number + 1) if existing else 1
+        datasette_table = f"{unit_type}_{unit_number}"
+        MonitoredUnit.objects.create(
+            unit_type=unit_type,
+            unit_number=unit_number,
+            datasette_table=datasette_table,
+        )
+    return redirect("monitor:management")
 
-    context = {
-        "page_title": "Management",
-        "db_count": SensorReading.objects.count(),
-        "sources": sources,
-    }
-    return render(request, "monitor/management.html", context)
+
+@login_required
+@user_passes_test(lambda user: user.is_staff)
+def toggle_unit_view(request, unit_id):
+    if request.method == "POST":
+        unit = MonitoredUnit.objects.get(pk=unit_id)
+        unit.active = not unit.active
+        unit.save()
+    return redirect("monitor:management")
+
 
 @login_required
 def dashboard_data_view(request):
@@ -149,6 +170,13 @@ def dashboard_data_view(request):
     )
     readings = dataset["readings"]
     summary = build_summary(readings)
+
+    if selected_source == "all":
+        unit_type = "fridge"
+    else:
+        unit_type = selected_source.rsplit("_", maxsplit=1)[0]
+
+    alert_message = _build_alert_message(unit_type)
 
     recent = []
     for r in readings[:12]:
@@ -174,8 +202,10 @@ def dashboard_data_view(request):
         "avg_pressure": round(summary["avg_pressure"], 2) if summary["avg_pressure"] is not None else None,
         "open_events": summary["open_events"],
         "latest_status": summary["latest_status"],
+        "alert_message": alert_message,
         "recent_readings": recent,
     })
+
 
 @login_required
 def chart_data_view(request):
@@ -185,13 +215,12 @@ def chart_data_view(request):
     qs = SensorReading.objects.filter(timestamp__gte=since).order_by("timestamp")
 
     if selected_source != "all":
-        fridge_type, fridge_number = selected_source.split("_", maxsplit=1)
+        fridge_type, fridge_number = selected_source.rsplit("_", maxsplit=1)
         qs = qs.filter(fridge_type=fridge_type, fridge_number=int(fridge_number))
 
-    # Group by unit
     units = {}
     for r in qs.values("timestamp", "temperature_c", "humidity_pct", "pressure_hpa", "fridge_type", "fridge_number"):
-        key = f"{r['fridge_type'].capitalize()} {r['fridge_number']}"
+        key = f"{r['fridge_type'].replace('_', ' ').title()} {r['fridge_number']}"
         if key not in units:
             units[key] = {"labels": [], "temperature": [], "humidity": [], "pressure": []}
         units[key]["labels"].append(r["timestamp"].strftime("%H:%M"))
@@ -200,12 +229,3 @@ def chart_data_view(request):
         units[key]["pressure"].append(round(r["pressure_hpa"], 2))
 
     return JsonResponse({"units": units})
-
-
-   # from .services import is_anomalous
-
-# def dashboard_view(request):
-#     readings = SensorReading.objects.all()
-#     for reading in readings:
-#         reading.anomalous = is_anomalous(reading)
-#     return render(request, "dashboard.html", {"readings": readings})
