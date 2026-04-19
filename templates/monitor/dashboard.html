@@ -8,9 +8,13 @@ function updateDashboard() {
     fetch(`/dashboard-data/?source=${source}`)
         .then(r => r.json())
         .then(data => {
-            document.getElementById("stat-temp").textContent = data.latest_temp !== null ? data.latest_temp + " C" : "--";
-            document.getElementById("stat-humidity").textContent = data.avg_humidity !== null ? data.avg_humidity + " %" : "--";
-            document.getElementById("stat-pressure").textContent = data.avg_pressure !== null ? data.avg_pressure + " hPa" : "--";
+            document.getElementById("stat-current-temp").textContent = data.latest_temp !== null ? data.latest_temp + " C" : "--";
+            document.getElementById("stat-current-humidity").textContent = data.latest_humidity !== null ? data.latest_humidity + " %" : "--";
+            document.getElementById("stat-current-pressure").textContent = data.latest_pressure !== null ? data.latest_pressure + " hPa" : "--";
+            document.getElementById("stat-current-light").textContent = data.latest_light !== null ? data.latest_light + " lux" : "--";
+            document.getElementById("stat-avg-temp").textContent = data.avg_temp !== null ? data.avg_temp + " C" : "--";
+            document.getElementById("stat-avg-humidity").textContent = data.avg_humidity !== null ? data.avg_humidity + " %" : "--";
+            document.getElementById("stat-avg-pressure").textContent = data.avg_pressure !== null ? data.avg_pressure + " hPa" : "--";
             document.getElementById("stat-door").textContent = data.open_events;
 
             const alert = document.getElementById("alert-unsafe");
@@ -56,16 +60,32 @@ setInterval(updateDashboard, 10000);
 
 <section class="stats-grid">
     <article class="stat-card">
-        <h2>Latest Temp</h2>
-        <p id="stat-temp">{% if summary.latest %}{{ summary.latest.temperature_c|floatformat:2 }} C{% else %}--{% endif %}</p>
+        <h2>Current Temperature</h2>
+        <p id="stat-current-temp">{% if summary.latest %}{{ summary.latest.temperature_c|floatformat:2 }} C{% else %}--{% endif %}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Current Humidity</h2>
+        <p id="stat-current-humidity">{% if summary.latest %}{{ summary.latest.humidity_pct|floatformat:2 }} %{% else %}--{% endif %}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Current Pressure</h2>
+        <p id="stat-current-pressure">{% if summary.latest %}{{ summary.latest.pressure_hpa|floatformat:2 }} hPa{% else %}--{% endif %}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Current Light Level</h2>
+        <p id="stat-current-light">{% if summary.latest %}{{ summary.latest.light_lux|floatformat:2 }} lux{% else %}--{% endif %}</p>
+    </article>
+    <article class="stat-card">
+        <h2>Average Temperature</h2>
+        <p id="stat-avg-temp">{% if summary.avg_temp is not None %}{{ summary.avg_temp|floatformat:2 }} C{% else %}--{% endif %}</p>
     </article>
     <article class="stat-card">
         <h2>Average Humidity</h2>
-        <p id="stat-humidity">{% if summary.avg_humidity %}{{ summary.avg_humidity|floatformat:2 }} %{% else %}--{% endif %}</p>
+        <p id="stat-avg-humidity">{% if summary.avg_humidity is not None %}{{ summary.avg_humidity|floatformat:2 }} %{% else %}--{% endif %}</p>
     </article>
     <article class="stat-card">
         <h2>Average Pressure</h2>
-        <p id="stat-pressure">{% if summary.avg_pressure %}{{ summary.avg_pressure|floatformat:2 }} hPa{% else %}--{% endif %}</p>
+        <p id="stat-avg-pressure">{% if summary.avg_pressure is not None %}{{ summary.avg_pressure|floatformat:2 }} hPa{% else %}--{% endif %}</p>
     </article>
     <article class="stat-card">
         <h2>Door Open Events</h2>

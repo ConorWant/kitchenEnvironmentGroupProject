@@ -163,8 +163,12 @@ def dashboard_data_view(request):
 
     return JsonResponse({
         "latest_temp": round(summary["latest"]["temperature_c"], 2) if summary["latest"] else None,
-        "avg_humidity": round(summary["avg_humidity"], 2) if summary["avg_humidity"] else None,
-        "avg_pressure": round(summary["avg_pressure"], 2) if summary["avg_pressure"] else None,
+        "latest_humidity": round(summary["latest"]["humidity_pct"], 2) if summary["latest"] else None,
+        "latest_pressure": round(summary["latest"]["pressure_hpa"], 2) if summary["latest"] else None,
+        "latest_light": round(summary["latest"]["light_lux"], 2) if summary["latest"] else None,
+        "avg_temp": round(summary["avg_temp"], 2) if summary["avg_temp"] is not None else None,
+        "avg_humidity": round(summary["avg_humidity"], 2) if summary["avg_humidity"] is not None else None,
+        "avg_pressure": round(summary["avg_pressure"], 2) if summary["avg_pressure"] is not None else None,
         "open_events": summary["open_events"],
         "latest_status": summary["latest_status"],
         "recent_readings": recent,
