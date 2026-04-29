@@ -17,10 +17,15 @@ function updateDashboard() {
             document.getElementById("stat-avg-pressure").textContent = data.avg_pressure !== null ? data.avg_pressure + " hPa" : "--";
             document.getElementById("stat-door").textContent = data.open_events;
 
-            const alert = document.getElementById("alert-unsafe");
-            if (alert) {
-                alert.textContent = data.alert_message;
-                alert.style.display = data.latest_status === "Unsafe" ? "" : "none";
+            const container = document.getElementById("alerts-container");
+            if (container) {
+                if (data.alerts && data.alerts.length > 0) {
+                    container.innerHTML = data.alerts.map(a =>
+                        `<div class="alert-unsafe"><strong>${a.unit}:</strong> ${a.issues.join(" &bull; ")}</div>`
+                    ).join("");
+                } else {
+                    container.innerHTML = "";
+                }
             }
 
             const tbody = document.getElementById("readings-tbody");
@@ -40,6 +45,7 @@ function updateDashboard() {
         .catch(err => console.error("Dashboard update failed:", err));
 }
 
+updateDashboard();
 setInterval(updateDashboard, 10000);
 </script>
 {% endblock %}
@@ -96,15 +102,7 @@ setInterval(updateDashboard, 10000);
     </article>
 </section>
 
-{% if summary.latest_status == "Unsafe" %}
-<div class="alert-unsafe" id="alert-unsafe">
-    Warning: Latest reading is classified as UNSAFE (temp &gt; 8&deg;C or door left open).
-</div>
-{% else %}
-<div class="alert-unsafe" id="alert-unsafe" style="display:none;">
-    Warning: Latest reading is classified as UNSAFE (temp &gt; 8&deg;C or door left open).
-</div>
-{% endif %}
+<div id="alerts-container"></div>
 
 <section class="panel">
     <h2>Recent Readings</h2>

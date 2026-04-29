@@ -15,14 +15,39 @@ from .services import build_summary, get_readings, UNIT_THRESHOLDS
 from .forms import CustomUserCreationForm
 
 
-def _build_alert_message(unit_type):
+DOOR_OPEN_ALERT_SECONDS = 60
+
+
+def _get_unit_alerts(latest_reading, unit_type, unit_label, unit_readings=None):
     thresholds = UNIT_THRESHOLDS.get(unit_type, UNIT_THRESHOLDS["fridge"])
-    parts = [f"temp outside {thresholds['temp_min']}–{thresholds['temp_max']}°C"]
-    if thresholds["humidity_min"] is not None:
-        parts.append(f"humidity outside {thresholds['humidity_min']}–{thresholds['humidity_max']}%")
-    if thresholds["lux_max"] is not None:
-        parts.append(f"light > {thresholds['lux_max']} lux")
-    return "Warning: Latest reading is UNSAFE (" + ", ".join(parts) + ")."
+    issues = []
+    temp = latest_reading["temperature_c"]
+    if temp < thresholds["temp_min"]:
+        issues.append(f"Temp {temp:.1f}°C below min {thresholds['temp_min']}°C")
+    elif temp > thresholds["temp_max"]:
+        issues.append(f"Temp {temp:.1f}°C above max {thresholds['temp_max']}°C")
+    lux = latest_reading["light_lux"]
+    if thresholds["lux_max"] is not None and lux > thresholds["lux_max"]:
+        issues.append(f"Light {lux:.0f} lux above max {thresholds['lux_max']} lux")
+    humidity = latest_reading["humidity_pct"]
+    if thresholds["humidity_min"] is not None and humidity < thresholds["humidity_min"]:
+        issues.append(f"Humidity {humidity:.1f}% below min {thresholds['humidity_min']}%")
+    elif thresholds["humidity_max"] is not None and humidity > thresholds["humidity_max"]:
+        issues.append(f"Humidity {humidity:.1f}% above max {thresholds['humidity_max']}%")
+    if str(latest_reading.get("door_status", "")).upper() == "OPEN":
+        open_since = latest_reading["timestamp"]
+        for r in (unit_readings or []):
+            if str(r.get("door_status", "")).upper() == "OPEN":
+                open_since = r["timestamp"]
+            else:
+                break
+        if hasattr(open_since, "tzinfo") and open_since.tzinfo is None:
+            open_since = timezone.make_aware(open_since)
+        elapsed = timezone.now() - open_since
+        if elapsed.total_seconds() >= DOOR_OPEN_ALERT_SECONDS:
+            minutes = int(elapsed.total_seconds() / 60)
+            issues.append(f"Door open for {minutes} min")
+    return {"unit": unit_label, "issues": issues} if issues else None
 
 
 def user_register_view(request):
@@ -214,12 +239,20 @@ def dashboard_data_view(request):
     readings = dataset["readings"]
     summary = build_summary(readings)
 
-    if selected_source == "all":
-        unit_type = "fridge"
-    else:
-        unit_type = selected_source.rsplit("_", maxsplit=1)[0]
+    seen_units = {}
+    unit_readings = {}
+    for r in readings:
+        key = (r["fridge_type"], r["fridge_number"])
+        if key not in seen_units:
+            seen_units[key] = r
+        unit_readings.setdefault(key, []).append(r)
 
-    alert_message = _build_alert_message(unit_type)
+    alerts = []
+    for (unit_type, unit_number), latest_r in seen_units.items():
+        label = f"{unit_type.replace('_', ' ').title()} {unit_number}"
+        alert = _get_unit_alerts(latest_r, unit_type, label, unit_readings[(unit_type, unit_number)])
+        if alert:
+            alerts.append(alert)
 
     recent = []
     for r in readings[:12]:
@@ -245,7 +278,7 @@ def dashboard_data_view(request):
         "avg_pressure": round(summary["avg_pressure"], 2) if summary["avg_pressure"] is not None else None,
         "open_events": summary["open_events"],
         "latest_status": summary["latest_status"],
-        "alert_message": alert_message,
+        "alerts": alerts,
         "recent_readings": recent,
     })
 
